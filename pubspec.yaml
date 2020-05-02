@@ -1,0 +1,32 @@
+name: flutter_nfc_manager
+description: A new Flutter project.
+version: 1.0.0+1
+publish_to: 'none'
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  nfc_manager:
+  package_info:
+  provider:
+  sqflite:
+  url_launcher:
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_launcher_icons:
+
+flutter:
+  uses-material-design: true
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path_android: "resources/icons/android.png"
+  image_path_ios: "resources/icons/ios.png"
+  adaptive_icon_foreground: resources/icons/android_adaptive.png
+  adaptive_icon_background: "#5688ed"

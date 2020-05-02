@@ -1,0 +1,3 @@
+class AppModel {}
+
+class HomeModel {}
