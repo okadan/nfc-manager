@@ -5,7 +5,7 @@ import 'package:nfc_manager/nfc_manager.dart';
 
 class NdefWriteModel {
   Stream<Iterable<Record>> subscribe() {
-    return RecordRepository.instance.getRecordList();
+    return RecordRepository.instance.subscribeList();
   }
 
   Future<void> delete(Record record) async {

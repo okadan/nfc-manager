@@ -15,7 +15,7 @@ class RecordRepository {
   final Map<int, StreamController> _controllers = {};
   final Map<int, StreamController> _subscribers = {};
 
-  Stream<Iterable<Record>> getRecordList() {
+  Stream<Iterable<Record>> subscribeList() {
     final int key = DateTime.now().millisecondsSinceEpoch;
     void fetch() async => _database.query('record')
       .then((value) => value.map((e) => Record.fromJson(e)))
