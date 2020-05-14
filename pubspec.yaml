@@ -29,4 +29,4 @@ flutter_icons:
   image_path_android: "resources/icons/android.png"
   image_path_ios: "resources/icons/ios.png"
   adaptive_icon_foreground: resources/icons/android_adaptive.png
-  adaptive_icon_background: "#5688ed"
+  adaptive_icon_background: "#4d8cfe"
