@@ -92,8 +92,8 @@ class TagReadPage extends StatelessWidget {
           final int size = dd['size'];
           if (type != null)
             tagWidgets.add(ListCell(
-              title: Text('Type'),
-              subtitle: Text('$type'),
+              title: Text('MiFare Classic Type'),
+              subtitle: Text('${_getMiFareClassicType(type)}'),
             ));
           if (size != null)
             tagWidgets.add(ListCell(
@@ -116,8 +116,8 @@ class TagReadPage extends StatelessWidget {
           final int type = dd['type'];
           if (type != null)
             tagWidgets.add(ListCell(
-              title: Text('Type'),
-              subtitle: Text('$type'),
+              title: Text('MiFare Ultralight Type'),
+              subtitle: Text('${_getMiFareUltralightType(type)}'),
             ));
         }
       }
@@ -232,12 +232,7 @@ class TagReadPage extends StatelessWidget {
         final Uint8List identifier = data['identifier'];
         tagWidgets.add(ListCell(
           title: Text('Type'),
-          subtitle: Text('MiFare ' + (
-            family == 2 ? 'Ultralight' :
-            family == 3 ? 'Plus' :
-            family == 4 ? 'Desfire' :
-            'Unknown'
-          )),
+          subtitle: Text('MiFare ${_getMiFareFamily(family)}'),
         ));
         if (identifier != null)
           tagWidgets.add(ListCell(
@@ -352,7 +347,7 @@ class TagReadPage extends StatelessWidget {
       if (type != null)
         ndefWidgets.add(ListCell(
           title: Text('Type'),
-          subtitle: Text('$type'),
+          subtitle: Text('${_getNdefType(type)}'),
         ));
       if (maxSize != null)
         ndefWidgets.add(ListCell(
@@ -414,4 +409,57 @@ List<String> _getTechList(Map<String, dynamic> data) {
   if (data.containsKey('ndefformattable'))
     techList.add('NdefFormattable');
   return techList;
+}
+
+String _getMiFareClassicType(int code) {
+  switch (code) {
+    case 0:
+      return 'Classic';
+    case 1:
+      return 'Plus';
+    case 2:
+      return 'Pro';
+    default:
+      return 'Unknown';
+  }
+}
+
+String _getMiFareUltralightType(int code) {
+  switch (code) {
+    case 1:
+      return 'Ultralight';
+    case 2:
+      return 'Ultralight C';
+    default:
+      return 'Unknown';
+  }
+}
+
+String _getMiFareFamily(int code) {
+  switch (code) {
+    case 2:
+      return 'Ultralight';
+    case 3:
+      return 'Plus';
+    case 4:
+      return 'Desfire';
+    case 1:
+    default:
+      return 'Unknown';
+  }
+}
+
+String _getNdefType(String code) {
+  switch (code) {
+    case 'org.nfcforum.ndef.type1':
+      return 'NFC Forum Tag Type 1';
+    case 'org.nfcforum.ndef.type2':
+      return 'NFC Forum Tag Type 2';
+    case 'org.nfcforum.ndef.type3':
+      return 'NFC Forum Tag Type 3';
+    case 'org.nfcforum.ndef.type4':
+      return 'NFC Forum Tag Type 4';
+    default:
+      return 'Unknown';
+  }
 }
