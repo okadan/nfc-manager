@@ -1,26 +1,34 @@
+import 'package:app/data/repository.dart';
+import 'package:app/view/about.dart';
+import 'package:app/view/common/list.dart';
+import 'package:app/view/edit_external.dart';
+import 'package:app/view/edit_mime.dart';
+import 'package:app/view/edit_text.dart';
+import 'package:app/view/edit_uri.dart';
+import 'package:app/view/ndef_record.dart';
+import 'package:app/view/ndef_write.dart';
+import 'package:app/view/ndef_write_lock.dart';
+import 'package:app/view/tag_read.dart';
+import 'package:app/viewmodel/app.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_nfc_manager/view/about.dart';
-import 'package:flutter_nfc_manager/view/edit_external.dart';
-import 'package:flutter_nfc_manager/view/edit_mime.dart';
-import 'package:flutter_nfc_manager/view/edit_text.dart';
-import 'package:flutter_nfc_manager/view/edit_uri.dart';
-import 'package:flutter_nfc_manager/view/ndef_record.dart';
-import 'package:flutter_nfc_manager/view/ndef_write.dart';
-import 'package:flutter_nfc_manager/view/ndef_write_lock.dart';
-import 'package:flutter_nfc_manager/view/tag_read.dart';
-import 'package:flutter_nfc_manager/view/widgets/list.dart';
-import 'package:flutter_nfc_manager/viewmodel/app.dart';
 import 'package:provider/provider.dart';
 
 class App extends StatelessWidget {
-  static Widget create() => Provider<AppModel>(
-    create: (context) => AppModel(),
+  static Widget create() => MultiProvider(
+    providers: [
+      FutureProvider<Repository>(
+        lazy: false,
+        create: (context) => Repository.getInstance(),
+      ),
+      ChangeNotifierProvider<AppModel>(
+        create: (context) => AppModel(),
+      ),
+    ],
     child: App(),
   );
 
   @override
   Widget build(BuildContext context) {
-    final AppModel _ = Provider.of(context);
     return MaterialApp(
       home: _Home.create(),
       theme: _themeData(context),
@@ -31,16 +39,17 @@ class App extends StatelessWidget {
 }
 
 class _Home extends StatelessWidget {
-  static Widget create() => Provider<HomeModel>(
+  static Widget create() => ChangeNotifierProvider<HomeModel>(
     create: (context) => HomeModel(),
     child: _Home(),
   );
 
   @override
   Widget build(BuildContext context) {
-    final HomeModel _ = Provider.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text('NfcManager')),
+      appBar: AppBar(
+        title: Text('NfcManager'),
+      ),
       body: SafeArea(
         child: ListView(
           padding: EdgeInsets.all(2),
@@ -68,7 +77,7 @@ class _Home extends StatelessWidget {
                 trailing: Icon(Icons.chevron_right),
                 onTap: () => Navigator.pushNamed(context, '/about'),
               ),
-            ])
+            ]),
           ],
         ),
       ),
@@ -78,20 +87,22 @@ class _Home extends StatelessWidget {
 
 ThemeData _themeData(BuildContext context) {
   return ThemeData(
+    appBarTheme: AppBarTheme(elevation: 2.0),
+    cardTheme: CardTheme(elevation: 0.5),
     splashColor: Colors.transparent,
-    inputDecorationTheme: InputDecorationTheme(filled: true),
+    visualDensity: VisualDensity.comfortable,
   );
 }
 
 ThemeData _themeDataDark(BuildContext context) {
-  return ThemeData(
-    brightness: Brightness.dark,
+  return ThemeData.dark().copyWith(
+    appBarTheme: AppBarTheme(elevation: 2.0),
     splashColor: Colors.transparent,
-    inputDecorationTheme: InputDecorationTheme(filled: true),
+    visualDensity: VisualDensity.comfortable,
   );
 }
 
-Route _generateRoute(RouteSettings settings) {
+Route<dynamic> _generateRoute(RouteSettings settings) {
   switch (settings.name) {
     case '/tag_read':
       return MaterialPageRoute(

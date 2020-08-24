@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 
 class ListCell extends StatelessWidget {
   const ListCell({
-    Key key,
     @required this.title,
     this.subtitle,
     this.trailing,
     this.onTap,
-  }) : super(key: key);
+  });
 
   final Widget title;
   final Widget subtitle;
@@ -19,7 +18,8 @@ class ListCell extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.fromLTRB(12, 10, trailing is Icon ? 4 : 10, 10),
+        constraints: BoxConstraints(minHeight: 44),
         child: Row(
           children: [
             Expanded(
@@ -27,7 +27,7 @@ class ListCell extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   DefaultTextStyle(
-                    style: Theme.of(context).textTheme.bodyText2.copyWith(fontSize: 17),
+                    style: Theme.of(context).textTheme.bodyText2.copyWith(fontSize: 16),
                     child: title,
                   ),
 
@@ -35,7 +35,7 @@ class ListCell extends StatelessWidget {
                     Container(
                       margin: EdgeInsets.only(top: 4),
                       child: DefaultTextStyle(
-                        style: Theme.of(context).textTheme.caption.copyWith(fontSize: 15),
+                        style: Theme.of(context).textTheme.caption.copyWith(fontSize: 14),
                         child: subtitle,
                       ),
                     ),
@@ -46,7 +46,7 @@ class ListCell extends StatelessWidget {
             if (trailing != null)
               Container(
                 child: DefaultTextStyle(
-                  style: Theme.of(context).textTheme.caption.copyWith(fontSize: 16),
+                  style: Theme.of(context).textTheme.caption.copyWith(fontSize: 15),
                   child: IconTheme(
                     data: IconThemeData(color: Theme.of(context).disabledColor, size: 20),
                     child: trailing,
@@ -62,12 +62,11 @@ class ListCell extends StatelessWidget {
 
 class ListCellButton extends StatelessWidget {
   const ListCellButton({
-    Key key,
     @required this.title,
     @required this.onTap,
     this.trailing,
     this.subtitle,
-  }) : super(key: key);
+  });
 
   final Widget title;
   final Widget trailing;
@@ -76,11 +75,11 @@ class ListCellButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color textColor = onTap == null
+    final textColor = onTap == null
       ? Theme.of(context).disabledColor
       : Theme.of(context).accentColor;
     return ListCell(
-      title: DefaultTextStyle(style: TextStyle(color: textColor, fontSize: 17), child: title),
+      title: DefaultTextStyle(style: TextStyle(color: textColor, fontSize: 16), child: title),
       subtitle: subtitle,
       trailing: trailing,
       onTap: onTap,
@@ -88,17 +87,58 @@ class ListCellButton extends StatelessWidget {
   }
 }
 
+class ListHeader extends StatelessWidget {
+  const ListHeader({this.label});
+
+  final Widget label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.bottomLeft,
+      constraints: BoxConstraints(minHeight: 24),
+      padding: EdgeInsets.only(left: 12, right: 12, bottom: 2),
+      child: label == null ? null : DefaultTextStyle(
+        style: Theme.of(context).textTheme.bodyText1.copyWith(
+          color: Theme.of(context).disabledColor,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+        child: label,
+      ),
+    );
+  }
+}
+
+class ListFooter extends StatelessWidget {
+  const ListFooter({this.label});
+
+  final Widget label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.topLeft,
+      constraints: BoxConstraints(minHeight: 24),
+      padding: EdgeInsets.only(left: 12, right: 12, top: 2),
+      child: label == null ? null : DefaultTextStyle(
+        style: Theme.of(context).textTheme.bodyText2.copyWith(
+          color: Theme.of(context).disabledColor
+        ),
+        child: label,
+      ),
+    );
+  }
+}
+
 class ListCellGroup extends StatelessWidget {
-  const ListCellGroup({
-    Key key,
-    @required this.children,
-  }) : super(key: key);
+  const ListCellGroup({ @required this.children });
 
   final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
-    int length = children.isEmpty ? 0 : children.length * 2 - 1;
+    final length = children.isEmpty ? 0 : children.length * 2 - 1;
     return Card(
       margin: EdgeInsets.all(2),
       child: Column(

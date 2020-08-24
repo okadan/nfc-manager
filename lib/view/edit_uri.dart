@@ -1,29 +1,29 @@
+import 'package:app/data/model.dart';
+import 'package:app/viewmodel/edit_uri.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_nfc_manager/model/record.dart';
-import 'package:flutter_nfc_manager/viewmodel/edit_uri.dart';
 import 'package:provider/provider.dart';
 
 class EditUriPage extends StatelessWidget {
-  static Widget create(Record record) => Provider<EditUriModel>(
-    create: (context) => EditUriModel(record),
+  static Widget create(Record record) => ChangeNotifierProvider<EditUriModel>(
+    create: (context) => EditUriModel(record, Provider.of(context, listen: false)),
     child: EditUriPage(),
   );
 
   @override
   Widget build(BuildContext context) {
-    final EditUriModel model = Provider.of(context);
     return Scaffold(
       appBar: AppBar(title: Text('Edit Uri')),
       body: SafeArea(
         child: Form(
-          key: model.formKey,
+          key: Provider.of<EditUriModel>(context, listen: false).formKey,
           child: ListView(
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.all(24),
             children: [
               Container(
+                constraints: BoxConstraints(minHeight: 72),
                 child: TextFormField(
-                  controller: model.uriController,
-                  decoration: InputDecoration(hintText: 'http://example.com', helperText: ''),
+                  controller: Provider.of<EditUriModel>(context, listen: false).uriController,
+                  decoration: InputDecoration(hintText: 'http://example.com'),
                   keyboardType: TextInputType.url,
                   validator: (v) => v.isEmpty ? 'required' : null,
                 ),
@@ -31,10 +31,10 @@ class EditUriPage extends StatelessWidget {
               Container(
                 constraints: BoxConstraints(minHeight: 40),
                 child: RaisedButton(
-                  child: Text('Submit'),
-                  onPressed: () => model.save()
-                    .then((_) => Navigator.pop(context))
-                    .catchError((_) {}),
+                  child: Text('Save'),
+                  onPressed: () => Provider.of<EditUriModel>(context, listen: false).save()
+                    .then((v) => v == null ? null : Navigator.pop(context))
+                    .catchError((e) => print('=== $e ===')),
                 ),
               ),
             ],

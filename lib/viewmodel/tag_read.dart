@@ -1,28 +1,31 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_nfc_manager/_private/felica_extensions.dart';
 import 'package:nfc_manager/nfc_manager.dart';
 import 'package:nfc_manager/platform_tags.dart';
 
-class TagReadModel {
-  final ValueNotifier<Map<String, dynamic>> dataNotifier = ValueNotifier(null);
+class TagReadModel with ChangeNotifier {
+  NfcTag tag;
+  Map additionalData;
 
   Future<String> handleTag(NfcTag tag) async {
-    final Map<String, dynamic> data = Map.from(tag.data);
+    this.tag = tag;
+    additionalData = {};
 
-    // TODO: more data
     if (Platform.isIOS) {
-      final FeliCa feliCa = FeliCa.fromTag(tag);
-      if (feliCa != null) {
+      if (FeliCa.from(tag) != null) {
+        final felica = FeliCa.from(tag);
         try {
-          final FeliCaPollingResponse response = await feliCa.polling();
-          data['pmm'] = response.pmm;
-        } catch (_) {}
+          additionalData['manufacturerParameter'] = (await felica.polling(
+            systemCode: felica.currentSystemCode,
+            requestCode: FeliCaPollingRequestCode.noRequest,
+            timeSlot: FeliCaPollingTimeSlot.max1,
+          )).manufacturerParameter;
+        } catch (e) { print('=== $e ==='); return null; } // skip tag discovery
       }
     }
 
-    dataNotifier.value = data;
+    notifyListeners();
     return '"Tag - Read" is completed.';
   }
 }

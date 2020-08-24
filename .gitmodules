@@ -1,4 +1,0 @@
-[submodule "lib/_private"]
-	path = lib/_private
-	url = https://github.com/okadan/nfc-manager-private.git
-	branch = master

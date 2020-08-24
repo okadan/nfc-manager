@@ -1,24 +1,24 @@
+import 'package:app/data/model.dart';
+import 'package:app/data/repository.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_nfc_manager/model/record.dart';
-import 'package:flutter_nfc_manager/repository/record.dart';
 import 'package:nfc_manager/nfc_manager.dart';
 
-class EditTextModel {
-  EditTextModel(this.record) {
-    if (record == null) return;
-    final Map<String, dynamic> data = parseNdefRecord(record.ndefRecord);
+class EditTextModel with ChangeNotifier {
+  EditTextModel(this.oldRecord, this.repo) {
+    if (oldRecord == null) return;
+    final data = parseNdefRecord(oldRecord.ndefRecord);
     textController.text = data['text'];
   }
 
-  final Record record;
+  final Record oldRecord;
+  final Repository repo;
   final GlobalKey<FormState> formKey = GlobalKey();
   final TextEditingController textController = TextEditingController();
 
-  Future<void> save() async {
-    if (!formKey.currentState.validate())
-      throw('form is invalid');
-    return RecordRepository.instance.insertOrUpdate(Record(
-      id: record?.id,
+  Future<int> save() async {
+    if (!formKey.currentState.validate()) return null;
+    return repo.upsertRecord(Record.fromNdefRecord(
+      id: oldRecord?.id,
       ndefRecord: NdefRecord.createText(textController.text),
     ));
   }

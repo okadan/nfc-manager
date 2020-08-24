@@ -1,3 +1,5 @@
-class AppModel {}
+import 'package:flutter/foundation.dart';
 
-class HomeModel {}
+class AppModel with ChangeNotifier {}
+
+class HomeModel with ChangeNotifier {}

@@ -3,21 +3,21 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:nfc_manager/nfc_manager.dart';
 
-Future<void> startTagSession({
+Future<void> startSession({
   @required BuildContext context,
   @required Future<String> Function(NfcTag) handleTag,
   String alertMessage = 'Hold your device near the item.',
 }) async {
   if (Platform.isIOS) {
-    return NfcManager.instance.startTagSession(
-      alertMessageIOS: alertMessage,
+    return NfcManager.instance.startSession(
+      alertMessage: alertMessage,
       onDiscovered: (tag) async {
         try {
-          final String result = await handleTag(tag);
+          final result = await handleTag(tag);
           if (result == null) return;
-          await NfcManager.instance.stopSession(alertMessageIOS: result);
+          await NfcManager.instance.stopSession(alertMessage: result);
         } catch (e) {
-          await NfcManager.instance.stopSession(errorMessageIOS: '$e');
+          await NfcManager.instance.stopSession(errorMessage: '$e');
         }
       },
     );
@@ -32,7 +32,10 @@ Future<void> startTagSession({
 }
 
 class _AndroidNfcDialog extends StatefulWidget {
-  _AndroidNfcDialog({ @required this.handleTag, @required this.alertMessage });
+  _AndroidNfcDialog({
+    @required this.handleTag,
+    @required this.alertMessage,
+  });
 
   final String alertMessage;
 
@@ -49,24 +52,24 @@ class _AndroidNfcDialogState extends State<_AndroidNfcDialog> {
   @override
   void initState() {
     super.initState();
-    NfcManager.instance.startTagSession(
+    NfcManager.instance.startSession(
       onDiscovered: (tag) async {
         try {
-          final String result = await widget.handleTag(tag);
+          final result = await widget.handleTag(tag);
           if (result == null) return;
           await NfcManager.instance.stopSession();
           setState(() => _alertMessage = result);
         } catch (e) {
-          await NfcManager.instance.stopSession();
+          await NfcManager.instance.stopSession().catchError((e) { /* no op */ });
           setState(() => _errorMessage = '$e');
         }
       },
-    );
+    ).catchError((e) => setState(() => _errorMessage = '$e'));
   }
 
   @override
   void dispose() {
-    NfcManager.instance.stopSession();
+    NfcManager.instance.stopSession().catchError((e) { /* no op */ });
     super.dispose();
   }
 
