@@ -88,7 +88,7 @@ class ListCellButton extends StatelessWidget {
 }
 
 class ListHeader extends StatelessWidget {
-  const ListHeader({this.label});
+  const ListHeader({ this.label });
 
   final Widget label;
 
@@ -97,7 +97,7 @@ class ListHeader extends StatelessWidget {
     return Container(
       alignment: Alignment.bottomLeft,
       constraints: BoxConstraints(minHeight: 24),
-      padding: EdgeInsets.only(left: 12, right: 12, bottom: 2),
+      padding: EdgeInsets.only(left: 14, right: 14, bottom: 2),
       child: label == null ? null : DefaultTextStyle(
         style: Theme.of(context).textTheme.bodyText1.copyWith(
           color: Theme.of(context).disabledColor,
@@ -111,7 +111,7 @@ class ListHeader extends StatelessWidget {
 }
 
 class ListFooter extends StatelessWidget {
-  const ListFooter({this.label});
+  const ListFooter({ this.label });
 
   final Widget label;
 
@@ -120,11 +120,9 @@ class ListFooter extends StatelessWidget {
     return Container(
       alignment: Alignment.topLeft,
       constraints: BoxConstraints(minHeight: 24),
-      padding: EdgeInsets.only(left: 12, right: 12, top: 2),
+      padding: EdgeInsets.only(left: 14, right: 14, top: 2),
       child: label == null ? null : DefaultTextStyle(
-        style: Theme.of(context).textTheme.bodyText2.copyWith(
-          color: Theme.of(context).disabledColor
-        ),
+        style: TextStyle(fontSize: 13, color: Theme.of(context).disabledColor),
         child: label,
       ),
     );

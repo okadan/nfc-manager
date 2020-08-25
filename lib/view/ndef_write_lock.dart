@@ -28,7 +28,11 @@ class NdefWriteLockPage extends StatelessWidget {
                   handleTag: Provider.of<NdefWriteLockModel>(context, listen: false).handleTag,
                 ),
               ),
-            ])
+            ]),
+            ListFooter(label: Text(
+              'This is a permanent action that you cannot undo.\n'
+              'After locking the tag, you can no longer write data to it.',
+            )),
           ],
         ),
       ),
