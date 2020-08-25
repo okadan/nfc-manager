@@ -1,5 +1,5 @@
 name: app
-description: A new Flutter project.
+description: Flutter app for accessing the NFC features on Android and iOS.
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  nfc_manager: ^2.0.0-dev
+  nfc_manager:
   package_info:
   provider:
   sqflite:
