@@ -12,6 +12,7 @@ class TagReadModel with ChangeNotifier {
     this.tag = tag;
     additionalData = {};
 
+    // TODO: more additional data
     if (Platform.isIOS) {
       if (FeliCa.from(tag) != null) {
         final felica = FeliCa.from(tag);

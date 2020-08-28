@@ -97,6 +97,7 @@ ThemeData _themeData(BuildContext context) {
 ThemeData _themeDataDark(BuildContext context) {
   return ThemeData.dark().copyWith(
     appBarTheme: AppBarTheme(elevation: 2.0),
+    cardTheme: CardTheme(elevation: 0.5),
     splashColor: Colors.transparent,
     visualDensity: VisualDensity.comfortable,
   );
