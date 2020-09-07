@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:app/data/model.dart';
+import 'package:app/util/util.dart';
 import 'package:app/view/common/list.dart';
 import 'package:app/view/common/nfc_session.dart';
 import 'package:app/viewmodel/tag_read.dart';
@@ -53,12 +54,12 @@ class TagReadPage extends StatelessWidget {
     if (Platform.isAndroid) {
       tagWidgets.add(ListCell(
         title: Text('Identifier'),
-        subtitle: Text((
+        subtitle: Text(hexFromBytes(
           NfcA.from(tag)?.identifier ??
           NfcB.from(tag)?.identifier ??
           NfcF.from(tag)?.identifier ??
           NfcV.from(tag)?.identifier
-        )?.toString()),
+        )),
       ));
       tagWidgets.add(ListCell(
         title: Text('Tech List'),
@@ -69,7 +70,7 @@ class TagReadPage extends StatelessWidget {
         final nfca = NfcA.from(tag);
         tagWidgets.add(ListCell(
           title: Text('NfcA - Atqa'),
-          subtitle: Text('${nfca.atqa}'),
+          subtitle: Text(hexFromBytes(nfca.atqa)),
         ));
         tagWidgets.add(ListCell(
           title: Text('NfcA - Sak'),
@@ -133,11 +134,11 @@ class TagReadPage extends StatelessWidget {
         final nfcb = NfcB.from(tag);
         tagWidgets.add(ListCell(
           title: Text('NfcB - Application Data'),
-          subtitle: Text('${nfcb.applicationData}'),
+          subtitle: Text(hexFromBytes(nfcb.applicationData)),
         ));
         tagWidgets.add(ListCell(
           title: Text('NfcB - Protocol Info'),
-          subtitle: Text('${nfcb.protocolInfo}'),
+          subtitle: Text(hexFromBytes(nfcb.protocolInfo)),
         ));
         tagWidgets.add(ListCell(
           title: Text('NfcB - Max Transceive Length'),
@@ -149,11 +150,11 @@ class TagReadPage extends StatelessWidget {
         final nfcf = NfcF.from(tag);
         tagWidgets.add(ListCell(
           title: Text('NfcF - System Code'),
-          subtitle: Text('${nfcf.systemCode}'),
+          subtitle: Text(hexFromBytes(nfcf.systemCode)),
         ));
         tagWidgets.add(ListCell(
           title: Text('NfcF - Manufacturer'),
-          subtitle: Text('${nfcf.manufacturer}'),
+          subtitle: Text(hexFromBytes(nfcf.manufacturer)),
         ));
         tagWidgets.add(ListCell(
           title: Text('NfcF - Max Transceive Length'),
@@ -185,11 +186,11 @@ class TagReadPage extends StatelessWidget {
         final isodep = IsoDep.from(tag);
         tagWidgets.add(ListCell(
           title: Text('IsoDep - Hi Layer Response'),
-          subtitle: Text('${isodep.hiLayerResponse}'),
+          subtitle: Text(hexFromBytes(isodep.hiLayerResponse)),
         ));
         tagWidgets.add(ListCell(
           title: Text('IsoDep - Historical Bytes'),
-          subtitle: Text('${isodep.historicalBytes}'),
+          subtitle: Text(hexFromBytes(isodep.historicalBytes)),
         ));
         tagWidgets.add(ListCell(
           title: Text('IsoDep - Extended Length Apdu Supported'),
@@ -216,15 +217,15 @@ class TagReadPage extends StatelessWidget {
         ));
         tagWidgets.add(ListCell(
           title: Text('Current IDm'),
-          subtitle: Text('${felica.currentIDm}'),
+          subtitle: Text(hexFromBytes(felica.currentIDm)),
         ));
         tagWidgets.add(ListCell(
           title: Text('Current System Code'),
-          subtitle: Text('${felica.currentSystemCode}'),
+          subtitle: Text(hexFromBytes(felica.currentSystemCode)),
         ));
         tagWidgets.add(ListCell(
           title: Text('Manufacturer Parameter'),
-          subtitle: Text('$manufacturerParameter'),
+          subtitle: Text(hexFromBytes(manufacturerParameter)),
         ));
       }
 
@@ -236,11 +237,11 @@ class TagReadPage extends StatelessWidget {
         ));
         tagWidgets.add(ListCell(
           title: Text('Identifier'),
-          subtitle: Text('${iso15693.identifier}'),
+          subtitle: Text(hexFromBytes(iso15693.identifier)),
         ));
         tagWidgets.add(ListCell(
           title: Text('IC Serial Number'),
-          subtitle: Text('${iso15693.icSerialNumber}'),
+          subtitle: Text(hexFromBytes(iso15693.icSerialNumber)),
         ));
         tagWidgets.add(ListCell(
           title: Text('IC Manufacturer Code'),
@@ -256,7 +257,7 @@ class TagReadPage extends StatelessWidget {
         ));
         tagWidgets.add(ListCell(
           title: Text('Identifier'),
-          subtitle: Text('${iso7816.identifier}'),
+          subtitle: Text(hexFromBytes(iso7816.identifier)),
         ));
         tagWidgets.add(ListCell(
           title: Text('Initial Selected AID'),
@@ -264,11 +265,11 @@ class TagReadPage extends StatelessWidget {
         ));
         tagWidgets.add(ListCell(
           title: Text('Application Data'),
-          subtitle: Text('${iso7816.applicationData}'),
+          subtitle: Text(hexFromBytes(iso7816.applicationData)),
         ));
         tagWidgets.add(ListCell(
           title: Text('Historical Bytes'),
-          subtitle: Text('${iso7816.historicalBytes}'),
+          subtitle: Text(hexFromBytes(iso7816.historicalBytes)),
         ));
         tagWidgets.add(ListCell(
           title: Text('Proprietary Application Data Coding'),
@@ -284,11 +285,11 @@ class TagReadPage extends StatelessWidget {
         ));
         tagWidgets.add(ListCell(
           title: Text('Identifier'),
-          subtitle: Text('${mifare.identifier}'),
+          subtitle: Text(hexFromBytes(mifare.identifier)),
         ));
         tagWidgets.add(ListCell(
           title: Text('Historical Bytes'),
-          subtitle: Text('${mifare.historicalBytes}'),
+          subtitle: Text(hexFromBytes(mifare.historicalBytes)),
         ));
       }
     }

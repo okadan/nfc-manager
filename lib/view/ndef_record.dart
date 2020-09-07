@@ -1,4 +1,5 @@
 import 'package:app/data/model.dart';
+import 'package:app/util/util.dart';
 import 'package:app/view/common/list.dart';
 import 'package:flutter/material.dart';
 import 'package:nfc_manager/nfc_manager.dart';
@@ -33,15 +34,15 @@ class NdefRecordPage extends StatelessWidget {
               ),
               ListCell(
                 title: Text('Type'),
-                subtitle: Text('${record.type}'),
+                subtitle: Text(hexFromBytes(record.type)),
               ),
               ListCell(
                 title: Text('Identifier'),
-                subtitle: Text('${record.identifier}'),
+                subtitle: Text(hexFromBytes(record.identifier)),
               ),
               ListCell(
                 title: Text('Payload'),
-                subtitle: Text('${record.payload}'),
+                subtitle: Text(hexFromBytes(record.payload)),
               ),
               ListCell(
                 title: Text('Total Size'),
