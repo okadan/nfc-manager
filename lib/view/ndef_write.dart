@@ -1,14 +1,57 @@
-import 'package:app/data/model.dart';
-import 'package:app/view/common/list.dart';
+import 'package:app/model/record.dart';
+import 'package:app/model/write_record.dart';
+import 'package:app/repository/repository.dart';
+import 'package:app/view/common/form_row.dart';
 import 'package:app/view/common/nfc_session.dart';
-import 'package:app/viewmodel/ndef_write.dart';
+import 'package:app/view/edit_external.dart';
+import 'package:app/view/edit_mime.dart';
+import 'package:app/view/edit_text.dart';
+import 'package:app/view/edit_uri.dart';
+import 'package:app/view/ndef_record.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:nfc_manager/nfc_manager.dart';
 import 'package:provider/provider.dart';
 
+class NdefWriteModel with ChangeNotifier {
+  NdefWriteModel(this._repo);
+
+  final Repository _repo;
+
+  Stream<Iterable<WriteRecord>> subscribe() {
+    return _repo.subscribeWriteRecordList();
+  }
+
+  Future<void> delete(WriteRecord record) {
+    return _repo.deleteWriteRecord(record);
+  }
+
+  Future<String?> handleTag(NfcTag tag, Iterable<WriteRecord> recordList) async {
+    final tech = Ndef.from(tag);
+
+    if (tech == null)
+      throw('Tag is not ndef.');
+
+    if (!tech.isWritable)
+      throw('Tag is not ndef writable.');
+
+    try {
+      final message = NdefMessage(recordList.map((e) => e.record).toList());
+      await tech.write(message);
+    } on PlatformException catch (e) {
+      throw(e.message ?? 'Some error has occurred.');
+    }
+
+    return '[Ndef - Write] is completed.';
+  }
+}
+
 class NdefWritePage extends StatelessWidget {
+  NdefWritePage._();
+
   static Widget create() => ChangeNotifierProvider<NdefWriteModel>(
     create: (context) => NdefWriteModel(Provider.of(context, listen: false)),
-    child: NdefWritePage(),
+    child: NdefWritePage._(),
   );
 
   @override
@@ -17,105 +60,195 @@ class NdefWritePage extends StatelessWidget {
       appBar: AppBar(
         title: Text('Ndef - Write'),
       ),
-      body: SafeArea(
-        child: StreamBuilder<Iterable<Record>>(
-          stream: Provider.of<NdefWriteModel>(context, listen: false).subscribe(),
-          builder: (context, ss) => ListView(
-            padding: EdgeInsets.all(2),
-            children: [
-              ListCellGroup(children: [
-                ListCell(
-                  title: Text('Add a record'),
+      body: StreamBuilder<Iterable<WriteRecord>>(
+        stream: Provider.of<NdefWriteModel>(context, listen: false).subscribe(),
+        builder: (context, ss) => ListView(
+          padding: EdgeInsets.all(2),
+          children: [
+            FormSection(
+              children: [
+                FormRow(
+                  title: Text('Add Record'),
                   trailing: Icon(Icons.chevron_right),
-                  onTap: () => showDialog(
-                    context: context,
-                    builder: (context) => SimpleDialog(
-                      title: Text('Select a record type'),
-                      children: [
-                        SimpleDialogOption(
-                          child: Text('Text'),
-                          onPressed: () => Navigator.pushReplacementNamed(context, '/edit_text'),
-                        ),
-                        SimpleDialogOption(
-                          child: Text('Uri'),
-                          onPressed: () => Navigator.pushReplacementNamed(context, '/edit_uri'),
-                        ),
-                        SimpleDialogOption(
-                          child: Text('Mime'),
-                          onPressed: () => Navigator.pushReplacementNamed(context, '/edit_mime'),
-                        ),
-                        SimpleDialogOption(
-                          child: Text('External'),
-                          onPressed: () => Navigator.pushReplacementNamed(context, '/edit_external'),
-                        ),
-                      ],
+                  onTap: () async {
+                    final result = await showDialog<String>(
+                      context: context,
+                      builder: (context) => SimpleDialog(
+                        title: Text('Record Types'),
+                        children: [
+                          SimpleDialogOption(
+                            child: Text('Text'),
+                            onPressed: () => Navigator.pop(context, 'text'),
+                          ),
+                          SimpleDialogOption(
+                            child: Text('Uri'),
+                            onPressed: () => Navigator.pop(context, 'uri'),
+                          ),
+                          SimpleDialogOption(
+                            child: Text('Mime'),
+                            onPressed: () => Navigator.pop(context, 'mime'),
+                          ),
+                          SimpleDialogOption(
+                            child: Text('External'),
+                            onPressed: () => Navigator.pop(context, 'external'),
+                          ),
+                        ],
+                      ),
+                    );
+                    switch (result) {
+                      case 'text':
+                        Navigator.push(context, MaterialPageRoute(
+                          fullscreenDialog: true,
+                          builder: (context) => EditTextPage.create(),
+                        ));
+                        break;
+                      case 'uri':
+                        Navigator.push(context, MaterialPageRoute(
+                          fullscreenDialog: true,
+                          builder: (context) => EditUriPage.create(),
+                        ));
+                        break;
+                      case 'mime':
+                        Navigator.push(context, MaterialPageRoute(
+                          fullscreenDialog: true,
+                          builder: (context) => EditMimePage.create(),
+                        ));
+                        break;
+                      case 'external':
+                        Navigator.push(context, MaterialPageRoute(
+                          fullscreenDialog: true,
+                          builder: (context) => EditExternalPage.create(),
+                        ));
+                        break;
+                      case null:
+                        break;
+                      default:
+                        throw('unsupported result: $result');
+                    }
+                  },
+                ),
+                FormRow(
+                  title: Text('Start Session', style: TextStyle(color: ss.data?.isNotEmpty != true
+                    ? Theme.of(context).disabledColor
+                    : Theme.of(context).accentColor),
+                  ),
+                  onTap: ss.data?.isNotEmpty != true
+                    ? null
+                    : () => startSession(
+                      context: context,
+                      handleTag: (tag) => Provider.of<NdefWriteModel>
+                        (context, listen: false).handleTag(tag, ss.data!),
                     ),
-                  ),
                 ),
-                ListCellButton(
-                  title: Text('Start a scan'),
-                  onTap: !ss.hasData || ss.data.isEmpty ? null : () => startSession(
-                    context: context,
-                    handleTag: (tag) =>
-                      Provider.of<NdefWriteModel>(context, listen: false).handleTag(tag, ss.data),
-                  ),
-                ),
-              ]),
-
-              if (ss.hasData && ss.data.isNotEmpty) ...[
-                ListHeader(label: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('RECORDS'),
-                    Text('Total ${ss.data.map((e) => e.ndefRecord.byteLength).reduce((a, b) => a + b)} bytes'),
-                  ],
-                )),
-                ListCellGroup(children: List.generate(ss.data.length, (i) {
-                  final record = ss.data.elementAt(i);
-                  final data = parseNdefRecord(record.ndefRecord);
-                  return ListCell(
-                    title: Text('#$i ${data['title']}'),
-                    subtitle: Text('${data['subtitle']}'),
-                    trailing: Icon(Icons.more_vert),
-                    onTap: () async {
-                      switch (await showModalBottomSheet(context: context, builder: (context) => SafeArea(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            ListHeader(label: Text('#$i ${data['title']} ${data['subtitle']}')),
-                            ListCell(title: Text('View Details'), onTap: () => Navigator.pop(context, 'viewDetails')),
-                            if (data['editType'] is String) ListCell(title: Text('Edit'), onTap: () => Navigator.pop(context, 'edit')),
-                            ListCell(title: Text('Delete'), onTap: () => Navigator.pop(context, 'delete')),
-                          ],
-                        ),
-                      ))) {
-                        case 'viewDetails':
-                          Navigator.pushNamed(context, '/ndef_record', arguments: record.ndefRecord);
-                          break;
-                        case 'edit':
-                          Navigator.pushNamed(context, '/edit_${data['editType']}', arguments: record);
-                          break;
-                        case 'delete':
-                          if ((await showDialog(context: context, builder: (context) => AlertDialog(
-                            title: Text('Delete?'),
-                            content: Text('#$i ${data['title']} : ${data['subtitle']}'),
-                            actions: [
-                              FlatButton(child: Text('Cancel'), onPressed: () => Navigator.pop(context, false)),
-                              FlatButton(child: Text('Delete'), onPressed: () => Navigator.pop(context, true)),
-                            ],
-                          ))) == true) Provider.of<NdefWriteModel>(context, listen: false).delete(record)
-                            .catchError((e) => print('=== $e ==='));
-                          break;
-                      }
-                    },
-                  );
-                })),
               ],
-            ],
-          ),
+            ),
+            if (ss.data?.isNotEmpty == true) FormSection(
+              header: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('RECORDS'),
+                  Text('${ss.data!.map((e) => e.record.byteLength).reduce((a, b) => a + b)} bytes'),
+                ],
+              ),
+              children: List.generate(ss.data!.length, (i) {
+                final record = ss.data!.elementAt(i);
+                return _WriteRecordFormRow(i, record);
+              }),
+            ),
+          ],
         ),
       ),
     );
   }
 }
+
+class _WriteRecordFormRow extends StatelessWidget {
+  const _WriteRecordFormRow(this.index, this.record);
+
+  final int index;
+
+  final WriteRecord record;
+
+  @override
+  Widget build(BuildContext context) {
+    final info = NdefRecordInfo.fromNdef(record.record);
+    final editPageBuilder = _kEditPageBuilderTable[info.record.runtimeType];
+    return FormRow(
+      title: Text('#$index ${info.title}'),
+      subtitle: Text('${info.subtitle}'),
+      trailing: Icon(Icons.more_vert),
+      onTap: () async {
+        final result = await showModalBottomSheet<String>(
+          context: context,
+          builder: (context) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ListTile(
+                  title: Text('View Details'),
+                  onTap: () => Navigator.pop(context, 'view_details'),
+                ),
+                if (editPageBuilder != null)
+                  ListTile(
+                    title: Text('Edit'),
+                    onTap: () => Navigator.pop(context, 'edit'),
+                  ),
+                ListTile(
+                  title: Text('Delete'),
+                  onTap: () => Navigator.pop(context, 'delete'),
+                ),
+              ],
+            ),
+          ),
+        );
+        switch (result) {
+          case 'view_details':
+            Navigator.push(context, MaterialPageRoute(
+              builder: (context) => NdefRecordPage(index, record.record),
+            ));
+            break;
+          case 'edit':
+            Navigator.push(context, MaterialPageRoute(
+              fullscreenDialog: true,
+              builder: (context) => editPageBuilder!(record),
+            ));
+            break;
+          case 'delete':
+            final result = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Text('Delete Record?'),
+                content: Text('#$index ${info.title}\n${info.subtitle}'),
+                actions: [
+                  TextButton(
+                    child: Text('CANCEL'),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  TextButton(
+                    child: Text('DELETE'),
+                    onPressed: () => Navigator.pop(context, true),
+                  ),
+                ],
+              ),
+            );
+            if (result == true)
+              Provider.of<NdefWriteModel>(context, listen: false).delete(record)
+                .catchError((e) => print('=== $e ==='));
+            break;
+          case null:
+            break;
+          default:
+            throw('unsupported result: $result');
+        }
+      },
+    );
+  }
+}
+
+final Map<Type, Widget Function(WriteRecord)> _kEditPageBuilderTable = Map.unmodifiable({
+  WellknownTextRecord: (record) => EditTextPage.create(record),
+  WellknownUriRecord: (record) => EditUriPage.create(record),
+  MimeRecord: (record) => EditMimePage.create(record),
+  ExternalRecord: (record) => EditExternalPage.create(record),
+});

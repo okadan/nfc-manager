@@ -1,10 +1,12 @@
-import 'package:app/view/common/list.dart';
+import 'package:app/view/common/form_row.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info/package_info.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutPage extends StatelessWidget {
-  static Widget create() => AboutPage();
+  AboutPage._();
+
+  static Widget create() => AboutPage._();
 
   @override
   Widget build(BuildContext context) {
@@ -12,36 +14,38 @@ class AboutPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('About'),
       ),
-      body: SafeArea(
-        child: ListView(
-          padding: EdgeInsets.all(2),
-          children: [
-            FutureBuilder<PackageInfo>(
-              future: PackageInfo.fromPlatform(),
-              builder: (context, ss) => ListCellGroup(children: [
-                ListCell(
+      body: ListView(
+        padding: EdgeInsets.all(2),
+        children: [
+          FutureBuilder<PackageInfo>(
+            future: PackageInfo.fromPlatform(),
+            builder: (context, ss) => FormSection(
+              children: [
+                FormRow(
                   title: Text('App Name'),
-                  trailing: Text('${ss.data?.appName}'),
+                  trailing: Text('${ss.data?.appName ?? ''}'),
                 ),
-                ListCell(
+                FormRow(
                   title: Text('Version'),
-                  trailing: Text('${ss.data?.version}'),
+                  trailing: Text('${ss.data?.version ?? ''}'),
                 ),
-                ListCell(
+                FormRow(
                   title: Text('Build Number'),
-                  trailing: Text('${ss.data?.buildNumber}'),
+                  trailing: Text('${ss.data?.buildNumber ?? ''}'),
                 ),
-              ]),
+              ],
             ),
-            ListCellGroup(children: [
-              ListCell(
+          ),
+          FormSection(
+            children: [
+              FormRow(
                 title: Text('Privacy Policy'),
-                trailing: Icon(Icons.chevron_right),
+                trailing: Icon(Icons.open_in_new),
                 onTap: () => launch('https://nfcmanager.naokiokada.com/privacy-policy/'),
               ),
-            ])
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }

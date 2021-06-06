@@ -1,44 +1,74 @@
-import 'package:app/data/model.dart';
-import 'package:app/viewmodel/edit_text.dart';
+import 'package:app/model/record.dart';
+import 'package:app/model/write_record.dart';
+import 'package:app/repository/repository.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+class EditTextModel with ChangeNotifier {
+  EditTextModel(this._repo, this.old) {
+    if (old == null) return;
+    final record = WellknownTextRecord.fromNdef(old!.record);
+    textController.text = record.text;
+  }
+
+  final Repository _repo;
+  final WriteRecord? old;
+  final GlobalKey<FormState> formKey = GlobalKey();
+  final TextEditingController textController = TextEditingController();
+
+  Future<Object> save() async {
+    if (!formKey.currentState!.validate())
+      throw('Form is invalid.');
+
+    final record = WellknownTextRecord(
+      languageCode: 'en', // FIX:
+      text: textController.text,
+    );
+
+    return _repo.createOrUpdateWriteRecord(WriteRecord(
+      id: old?.id,
+      record: record.toNdef(),
+    ));
+  }
+}
+
 class EditTextPage extends StatelessWidget {
-  static Widget create(Record record) => ChangeNotifierProvider<EditTextModel>(
-    create: (context) => EditTextModel(record, Provider.of(context, listen: false)),
-    child: EditTextPage(),
+  EditTextPage._();
+
+  static Widget create([WriteRecord? record]) => ChangeNotifierProvider<EditTextModel>(
+    create: (context) => EditTextModel(Provider.of(context, listen: false), record),
+    child: EditTextPage._(),
   );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Edit Text')),
-      body: SafeArea(
-        child: Form(
-          key: Provider.of<EditTextModel>(context, listen: false).formKey,
-          child: ListView(
-            padding: EdgeInsets.all(24),
-            children: [
-              Container(
-                constraints: BoxConstraints(minHeight: 72),
-                child: TextFormField(
-                  controller: Provider.of<EditTextModel>(context, listen: false).textController,
-                  decoration: InputDecoration(hintText: 'Text'),
-                  keyboardType: TextInputType.text,
-                  validator: (v) => v.isEmpty ? 'required' : null,
-                ),
+      appBar: AppBar(
+        title: Text('Edit Text'),
+      ),
+      body: Form(
+        key: Provider.of<EditTextModel>(context, listen: false).formKey,
+        child: ListView(
+          padding: EdgeInsets.all(24),
+          children: [
+            Container(
+              child: TextFormField(
+                controller: Provider.of<EditTextModel>(context, listen: false).textController,
+                decoration: InputDecoration(labelText: 'Text', helperText: ''),
+                keyboardType: TextInputType.text,
+                validator: (value) => value?.isNotEmpty != true ? 'Required' : null,
               ),
-              Container(
-                constraints: BoxConstraints(minHeight: 40),
-                child: RaisedButton(
-                  child: Text('Save'),
-                  onPressed: () => Provider.of<EditTextModel>(context, listen: false).save()
-                    .then((v) => v == null ? null : Navigator.pop(context))
-                    .catchError((e) => e == null ? null : print('=== $e ===')),
-                ),
+            ),
+            Container(
+              margin: EdgeInsets.only(top: 8),
+              child: ElevatedButton(
+                child: Text('Save'),
+                onPressed: () => Provider.of<EditTextModel>(context, listen: false).save()
+                  .then((_) => Navigator.pop(context))
+                  .catchError((e) => print('=== $e ===')),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

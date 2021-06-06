@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:nfc_manager/nfc_manager.dart';
 
 Future<void> startSession({
-  @required BuildContext context,
-  @required Future<String> Function(NfcTag) handleTag,
+  required BuildContext context,
+  required Future<String?> Function(NfcTag) handleTag,
   String alertMessage = 'Hold your device near the item.',
 }) async {
   if (Platform.isIOS) {
@@ -24,30 +24,25 @@ Future<void> startSession({
   }
   return showDialog(
     context: context,
-    builder: (context) => _AndroidNfcDialog(
-      alertMessage: alertMessage,
-      handleTag: handleTag,
-    ),
+    builder: (context) => _AndroidNfcSessionDialog(alertMessage, handleTag),
   );
 }
 
-class _AndroidNfcDialog extends StatefulWidget {
-  _AndroidNfcDialog({
-    @required this.handleTag,
-    @required this.alertMessage,
-  });
+class _AndroidNfcSessionDialog extends StatefulWidget {
+  const _AndroidNfcSessionDialog(this.alertMessage, this.handleTag);
 
   final String alertMessage;
 
-  final Future<String> Function(NfcTag tag) handleTag;
+  final Future<String?> Function(NfcTag tag) handleTag;
 
   @override
-  State<StatefulWidget> createState() => _AndroidNfcDialogState();
+  State<StatefulWidget> createState() => _AndroidNfcSessionDialogState();
 }
 
-class _AndroidNfcDialogState extends State<_AndroidNfcDialog> {
-  String _alertMessage;
-  String _errorMessage;
+class _AndroidNfcSessionDialogState extends State<_AndroidNfcSessionDialog> {
+  String? _alertMessage;
+
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -60,7 +55,7 @@ class _AndroidNfcDialogState extends State<_AndroidNfcDialog> {
           await NfcManager.instance.stopSession();
           setState(() => _alertMessage = result);
         } catch (e) {
-          await NfcManager.instance.stopSession().catchError((e) { /* no op */ });
+          await NfcManager.instance.stopSession().catchError((_) { /* no op */ });
           setState(() => _errorMessage = '$e');
         }
       },
@@ -69,7 +64,7 @@ class _AndroidNfcDialogState extends State<_AndroidNfcDialog> {
 
   @override
   void dispose() {
-    NfcManager.instance.stopSession().catchError((e) { /* no op */ });
+    NfcManager.instance.stopSession().catchError((_) { /* no op */ });
     super.dispose();
   }
 
@@ -82,16 +77,16 @@ class _AndroidNfcDialogState extends State<_AndroidNfcDialog> {
         'Ready to scan',
       ),
       content: Text(
-        _errorMessage?.isNotEmpty == true ? _errorMessage :
-        _alertMessage?.isNotEmpty == true ? _alertMessage :
+        _errorMessage?.isNotEmpty == true ? _errorMessage! :
+        _alertMessage?.isNotEmpty == true ? _alertMessage! :
         widget.alertMessage,
       ),
       actions: [
-        FlatButton(
+        TextButton(
           child: Text(
-            _errorMessage?.isNotEmpty == true ? 'Got it' :
+            _errorMessage?.isNotEmpty == true ? 'GOT IT' :
             _alertMessage?.isNotEmpty == true ? 'OK' :
-            'Cancel',
+            'CANCEL',
           ),
           onPressed: () => Navigator.pop(context),
         ),

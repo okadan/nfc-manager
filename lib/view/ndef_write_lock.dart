@@ -1,13 +1,37 @@
-import 'package:app/view/common/list.dart';
+import 'package:app/view/common/form_row.dart';
 import 'package:app/view/common/nfc_session.dart';
-import 'package:app/viewmodel/ndef_write_lock.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:nfc_manager/nfc_manager.dart';
 import 'package:provider/provider.dart';
 
+class NdefWriteLockModel with ChangeNotifier {
+  Future<String?> handleTag(NfcTag tag) async {
+    final tech = Ndef.from(tag);
+
+    if (tech == null)
+      throw('Tag is not ndef.');
+
+    // check android-specific property.
+    if (tech.additionalData['canMakeReadOnly'] == false)
+      throw('The operation is not allowed on this tag.');
+
+    try {
+      await tech.writeLock();
+    } on PlatformException catch (e) {
+      throw(e.message ?? 'Some error has occurred.');
+    }
+
+    return '[Ndef - Write Lock] is completed.';
+  }
+}
+
 class NdefWriteLockPage extends StatelessWidget {
+  NdefWriteLockPage._();
+
   static Widget create() => ChangeNotifierProvider<NdefWriteLockModel>(
     create: (context) => NdefWriteLockModel(),
-    child: NdefWriteLockPage(),
+    child: NdefWriteLockPage._(),
   );
 
   @override
@@ -16,25 +40,44 @@ class NdefWriteLockPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('Ndef - Write Lock'),
       ),
-      body: SafeArea(
-        child: ListView(
-          padding: EdgeInsets.all(2),
-          children: [
-            ListCellGroup(children: [
-              ListCellButton(
-                title: Text('Start a scan'),
-                onTap: () => startSession(
-                  context: context,
-                  handleTag: Provider.of<NdefWriteLockModel>(context, listen: false).handleTag,
-                ),
+      body: ListView(
+        padding: EdgeInsets.all(2),
+        children: [
+          FormSection(
+            children: [
+              FormRow(
+                title: Text('Start Session', style: TextStyle(color: Theme.of(context).accentColor)),
+                onTap: () async {
+                  final result = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text('Warning'),
+                      content: Text(
+                        'This is a permanent action that you cannot undo. '
+                        'After locking the tag, you can no longer write data to it.',
+                      ),
+                      actions: [
+                        TextButton(
+                          child: Text('CANCEL'),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        TextButton(
+                          child: Text('START'),
+                          onPressed: () => Navigator.pop(context, true),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (result == true)
+                    startSession(
+                      context: context,
+                      handleTag: Provider.of<NdefWriteLockModel>(context, listen: false).handleTag,
+                    );
+                },
               ),
-            ]),
-            ListFooter(label: Text(
-              'This is a permanent action that you cannot undo.\n'
-              'After locking the tag, you can no longer write data to it.',
-            )),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }

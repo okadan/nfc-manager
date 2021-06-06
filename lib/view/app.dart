@@ -1,151 +1,114 @@
-import 'package:app/data/repository.dart';
+import 'dart:io';
+
+import 'package:app/repository/repository.dart';
 import 'package:app/view/about.dart';
-import 'package:app/view/common/list.dart';
-import 'package:app/view/edit_external.dart';
-import 'package:app/view/edit_mime.dart';
-import 'package:app/view/edit_text.dart';
-import 'package:app/view/edit_uri.dart';
-import 'package:app/view/ndef_record.dart';
+import 'package:app/view/common/form_row.dart';
+import 'package:app/view/ndef_format.dart';
 import 'package:app/view/ndef_write.dart';
 import 'package:app/view/ndef_write_lock.dart';
 import 'package:app/view/tag_read.dart';
-import 'package:app/viewmodel/app.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class App extends StatelessWidget {
-  static Widget create() => MultiProvider(
-    providers: [
-      FutureProvider<Repository>(
-        lazy: false,
-        create: (context) => Repository.getInstance(),
-      ),
-      ChangeNotifierProvider<AppModel>(
-        create: (context) => AppModel(),
-      ),
-    ],
-    child: App(),
-  );
+  App._();
+
+  static Future<Widget> create() async {
+    final repository = await Repository.createInstance();
+    return MultiProvider(
+      providers: [
+        Provider<Repository>.value(
+          value: repository,
+        ),
+      ],
+      child: App._(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: _Home.create(),
-      theme: _themeData(context),
-      darkTheme: _themeDataDark(context),
-      onGenerateRoute: _generateRoute,
+      theme: _createTheme(context),
     );
   }
 }
 
 class _Home extends StatelessWidget {
-  static Widget create() => ChangeNotifierProvider<HomeModel>(
-    create: (context) => HomeModel(),
-    child: _Home(),
-  );
+  _Home._();
+
+  static Widget create() => _Home._();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('NfcManager'),
+        title: Text('NFC Manager'),
       ),
-      body: SafeArea(
-        child: ListView(
-          padding: EdgeInsets.all(2),
-          children: [
-            ListCellGroup(children: [
-              ListCell(
+      body: ListView(
+        padding: EdgeInsets.all(2),
+        children: [
+          FormSection(
+            children: [
+              FormRow(
                 title: Text('Tag - Read'),
                 trailing: Icon(Icons.chevron_right),
-                onTap: () => Navigator.pushNamed(context, '/tag_read'),
+                onTap: () => Navigator.push(context, MaterialPageRoute(
+                  builder: (context) => TagReadPage.create(),
+                )),
               ),
-              ListCell(
+              FormRow(
                 title: Text('Ndef - Write'),
                 trailing: Icon(Icons.chevron_right),
-                onTap: () => Navigator.pushNamed(context, '/ndef_write'),
+                onTap: () => Navigator.push(context, MaterialPageRoute(
+                  builder: (context) => NdefWritePage.create(),
+                )),
               ),
-              ListCell(
+              FormRow(
                 title: Text('Ndef - Write Lock'),
                 trailing: Icon(Icons.chevron_right),
-                onTap: () => Navigator.pushNamed(context, '/ndef_write_lock'),
+                onTap: () => Navigator.push(context, MaterialPageRoute(
+                  builder: (context) => NdefWriteLockPage.create(),
+                )),
               ),
-            ]),
-            ListCellGroup(children: [
-              ListCell(
+              if (Platform.isAndroid)
+                FormRow(
+                  title: Text('Ndef - Format'),
+                  trailing: Icon(Icons.chevron_right),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(
+                    builder: (context) => NdefFormatPage.create(),
+                  )),
+                ),
+            ],
+          ),
+          FormSection(
+            children: [
+              FormRow(
                 title: Text('About'),
                 trailing: Icon(Icons.chevron_right),
-                onTap: () => Navigator.pushNamed(context, '/about'),
+                onTap: () => Navigator.push(context, MaterialPageRoute(
+                  builder: (context) => AboutPage.create(),
+                )),
               ),
-            ]),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
-ThemeData _themeData(BuildContext context) {
+ThemeData _createTheme(BuildContext context) {
   return ThemeData(
-    appBarTheme: AppBarTheme(elevation: 2.0),
-    cardTheme: CardTheme(elevation: 0.5),
-    splashColor: Colors.transparent,
-    visualDensity: VisualDensity.comfortable,
+    inputDecorationTheme: InputDecorationTheme(
+      isDense: true,
+      border: OutlineInputBorder(),
+      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+      errorStyle: TextStyle(height: 0.7),
+      helperStyle: TextStyle(height: 0.7),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(style: ButtonStyle(
+      minimumSize: MaterialStateProperty.all(Size.fromHeight(40)),
+    )),
   );
-}
-
-ThemeData _themeDataDark(BuildContext context) {
-  return ThemeData.dark().copyWith(
-    appBarTheme: AppBarTheme(elevation: 2.0),
-    cardTheme: CardTheme(elevation: 0.5),
-    splashColor: Colors.transparent,
-    visualDensity: VisualDensity.comfortable,
-  );
-}
-
-Route<dynamic> _generateRoute(RouteSettings settings) {
-  switch (settings.name) {
-    case '/tag_read':
-      return MaterialPageRoute(
-        builder: (context) => TagReadPage.create(),
-      );
-    case '/ndef_write':
-      return MaterialPageRoute(
-        builder: (context) => NdefWritePage.create(),
-      );
-    case '/ndef_write_lock':
-      return MaterialPageRoute(
-        builder: (context) => NdefWriteLockPage.create(),
-      );
-    case '/edit_text':
-      return MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (context) => EditTextPage.create(settings.arguments),
-      );
-    case '/edit_uri':
-      return MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (context) => EditUriPage.create(settings.arguments),
-      );
-    case '/edit_mime':
-      return MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (context) => EditMimePage.create(settings.arguments),
-      );
-    case '/edit_external':
-      return MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (context) => EditExternalPage.create(settings.arguments),
-      );
-    case '/ndef_record':
-      return MaterialPageRoute(
-        builder: (context) => NdefRecordPage.create(settings.arguments),
-      );
-    case '/about':
-      return MaterialPageRoute(
-        builder: (context) => AboutPage.create(),
-      );
-    default:
-      return null;
-  }
 }

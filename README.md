@@ -1,4 +1,4 @@
-# flutter-nfc-manager-app
+# NFC Manager
 
 Flutter app for accessing the NFC features on Android and iOS.
 

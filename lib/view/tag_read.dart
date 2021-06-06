@@ -1,21 +1,354 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:app/data/model.dart';
-import 'package:app/util/util.dart';
-import 'package:app/view/common/list.dart';
+import 'package:app/extension/extension.dart';
+import 'package:app/view/common/form_row.dart';
 import 'package:app/view/common/nfc_session.dart';
-import 'package:app/viewmodel/tag_read.dart';
+import 'package:app/view/ndef_record.dart';
 import 'package:flutter/material.dart';
 import 'package:nfc_manager/nfc_manager.dart';
 import 'package:nfc_manager/platform_tags.dart';
 import 'package:provider/provider.dart';
 
+class TagReadModel with ChangeNotifier {
+  NfcTag? tag;
+
+  Map<String, dynamic>? additionalData;
+
+  Future<String?> handleTag(NfcTag tag) async {
+    this.tag = tag;
+    additionalData = {};
+
+    // FIX: more additional data
+    Object? tech;
+    if (Platform.isIOS) {
+      tech = FeliCa.from(tag);
+      if (tech is FeliCa) {
+        final polling = await tech.polling(
+          systemCode: tech.currentSystemCode,
+          requestCode: FeliCaPollingRequestCode.noRequest,
+          timeSlot: FeliCaPollingTimeSlot.max1,
+        );
+        additionalData!['manufacturerParameter'] = polling.manufacturerParameter;
+      }
+    }
+
+    notifyListeners();
+    return '[Tag - Read] is completed.';
+  }
+}
+
 class TagReadPage extends StatelessWidget {
+  TagReadPage._();
+
   static Widget create() => ChangeNotifierProvider<TagReadModel>(
     create: (context) => TagReadModel(),
-    child: TagReadPage(),
+    child: TagReadPage._(),
   );
+
+  List<Widget> _buildTagWidgets(
+    BuildContext context, NfcTag tag, Map<String, dynamic> additionalData,
+  ) {
+    final tagWidgets = <Widget>[];
+    final ndefWidgets = <Widget>[];
+
+    Object? tech;
+
+    if (Platform.isAndroid) {
+      tagWidgets.add(FormRow(
+        title: Text('Identifier'),
+        subtitle: Text('${(
+          NfcA.from(tag)?.identifier ??
+          NfcB.from(tag)?.identifier ??
+          NfcF.from(tag)?.identifier ??
+          NfcV.from(tag)?.identifier ??
+          Uint8List(0)
+        ).toHexString()}'),
+      ));
+      tagWidgets.add(FormRow(
+        title: Text('Tech List'),
+        subtitle: Text(_getTechListString(tag)),
+      ));
+
+      tech = NfcA.from(tag);
+      if (tech is NfcA) {
+        tagWidgets.add(FormRow(
+          title: Text('NfcA - Atqa'),
+          subtitle: Text('${tech.atqa.toHexString()}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('NfcA - Sak'),
+          subtitle: Text('${tech.sak}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('NfcA - Max Transceive Length'),
+          subtitle: Text('${tech.maxTransceiveLength}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('NfcA - Timeout'),
+          subtitle: Text('${tech.timeout}'),
+        ));
+
+        tech = MifareClassic.from(tag);
+        if (tech is MifareClassic) {
+          tagWidgets.add(FormRow(
+            title: Text('MifareClassic - Type'),
+            subtitle: Text(_getMiFareClassicTypeString(tech.type)),
+          ));
+          tagWidgets.add(FormRow(
+            title: Text('MifareClassic - Size'),
+            subtitle: Text('${tech.size}'),
+          ));
+          tagWidgets.add(FormRow(
+            title: Text('MifareClassic - Sector Count'),
+            subtitle: Text('${tech.sectorCount}'),
+          ));
+          tagWidgets.add(FormRow(
+            title: Text('MifareClassic - Block Count'),
+            subtitle: Text('${tech.blockCount}'),
+          ));
+          tagWidgets.add(FormRow(
+            title: Text('MifareClassic - Max Transceive Length'),
+            subtitle: Text('${tech.maxTransceiveLength}'),
+          ));
+          tagWidgets.add(FormRow(
+            title: Text('MifareClassic - Timeout'),
+            subtitle: Text('${tech.timeout}'),
+          ));
+        }
+
+        tech = MifareUltralight.from(tag);
+        if (tech is MifareUltralight) {
+          tagWidgets.add(FormRow(
+            title: Text('MifareUltralight - Type'),
+            subtitle: Text(_getMiFareUltralightTypeString(tech.type)),
+          ));
+          tagWidgets.add(FormRow(
+            title: Text('MifareUltralight - Max Transceive Length'),
+            subtitle: Text('${tech.maxTransceiveLength}'),
+          ));
+          tagWidgets.add(FormRow(
+            title: Text('MifareUltralight - Timeout'),
+            subtitle: Text('${tech.timeout}'),
+          ));
+        }
+      }
+
+      tech = NfcB.from(tag);
+      if (tech is NfcB) {
+        tagWidgets.add(FormRow(
+          title: Text('NfcB - Application Data'),
+          subtitle: Text('${tech.applicationData.toHexString()}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('NfcB - Protocol Info'),
+          subtitle: Text('${tech.protocolInfo.toHexString()}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('NfcB - Max Transceive Length'),
+          subtitle: Text('${tech.maxTransceiveLength}'),
+        ));
+      }
+
+      tech = NfcF.from(tag);
+      if (tech is NfcF) {
+        tagWidgets.add(FormRow(
+          title: Text('NfcF - System Code'),
+          subtitle: Text('${tech.systemCode.toHexString()}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('NfcF - Manufacturer'),
+          subtitle: Text('${tech.manufacturer.toHexString()}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('NfcF - Max Transceive Length'),
+          subtitle: Text('${tech.maxTransceiveLength}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('NfcF - Timeout'),
+          subtitle: Text('${tech.timeout}'),
+        ));
+      }
+
+      tech = NfcV.from(tag);
+      if (tech is NfcV) {
+        tagWidgets.add(FormRow(
+          title: Text('NfcV - DsfId'),
+          subtitle: Text('${tech.dsfId}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('NfcV - Response Flags'),
+          subtitle: Text('${tech.responseFlags}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('NfcV - Max Transceive Length'),
+          subtitle: Text('${tech.maxTransceiveLength}'),
+        ));
+      }
+
+      tech = IsoDep.from(tag);
+      if (tech is IsoDep) {
+        tagWidgets.add(FormRow(
+          title: Text('IsoDep - Hi Layer Response'),
+          subtitle: Text('${tech.hiLayerResponse?.toHexString() ?? '-'}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('IsoDep - Historical Bytes'),
+          subtitle: Text('${tech.historicalBytes?.toHexString() ?? '-'}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('IsoDep - Extended Length Apdu Supported'),
+          subtitle: Text('${tech.isExtendedLengthApduSupported}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('IsoDep - Max Transceive Length'),
+          subtitle: Text('${tech.maxTransceiveLength}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('IsoDep - Timeout'),
+          subtitle: Text('${tech.timeout}'),
+        ));
+      }
+    }
+
+    if (Platform.isIOS) {
+      tech = FeliCa.from(tag);
+      if (tech is FeliCa) {
+        final manufacturerParameter = additionalData['manufacturerParameter'] as Uint8List?;
+        tagWidgets.add(FormRow(
+          title: Text('Type'),
+          subtitle: Text('FeliCa'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('Current IDm'),
+          subtitle: Text('${tech.currentIDm.toHexString()}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('Current System Code'),
+          subtitle: Text('${tech.currentSystemCode.toHexString()}'),
+        ));
+        if (manufacturerParameter != null)
+          tagWidgets.add(FormRow(
+            title: Text('Manufacturer Parameter'),
+            subtitle: Text('${manufacturerParameter.toHexString()}'),
+          ));
+      }
+
+      tech = Iso15693.from(tag);
+      if (tech is Iso15693) {
+        tagWidgets.add(FormRow(
+          title: Text('Type'),
+          subtitle: Text('ISO15693'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('Identifier'),
+          subtitle: Text('${tech.identifier.toHexString()}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('IC Serial Number'),
+          subtitle: Text('${tech.icSerialNumber.toHexString()}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('IC Manufacturer Code'),
+          subtitle: Text('${tech.icManufacturerCode}'),
+        ));
+      }
+
+      tech = Iso7816.from(tag);
+      if (tech is Iso7816) {
+        tagWidgets.add(FormRow(
+          title: Text('Type'),
+          subtitle: Text('ISO7816'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('Identifier'),
+          subtitle: Text('${tech.identifier.toHexString()}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('Initial Selected AID'),
+          subtitle: Text('${tech.initialSelectedAID}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('Application Data'),
+          subtitle: Text('${tech.applicationData?.toHexString() ?? '-'}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('Historical Bytes'),
+          subtitle: Text('${tech.historicalBytes?.toHexString() ?? '-'}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('Proprietary Application Data Coding'),
+          subtitle: Text('${tech.proprietaryApplicationDataCoding}'),
+        ));
+      }
+
+      tech = MiFare.from(tag);
+      if (tech is MiFare) {
+        tagWidgets.add(FormRow(
+          title: Text('Type'),
+          subtitle: Text('MiFare ' + _getMiFareFamilyString(tech.mifareFamily)),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('Identifier'),
+          subtitle: Text('${tech.identifier.toHexString()}'),
+        ));
+        tagWidgets.add(FormRow(
+          title: Text('Historical Bytes'),
+          subtitle: Text('${tech.historicalBytes?.toHexString() ?? '-'}'),
+        ));
+      }
+    }
+
+    tech = Ndef.from(tag);
+    if (tech is Ndef) {
+      final cachedMessage = tech.cachedMessage;
+      final canMakeReadOnly = tech.additionalData['canMakeReadOnly'] as bool?;
+      final type = tech.additionalData['type'] as String?;
+      if (type != null)
+        ndefWidgets.add(FormRow(
+          title: Text('Type'),
+          subtitle: Text(_getNdefType(type)),
+        ));
+      ndefWidgets.add(FormRow(
+        title: Text('Size'),
+        subtitle: Text('${cachedMessage?.byteLength ?? 0} / ${tech.maxSize} bytes'),
+      ));
+      ndefWidgets.add(FormRow(
+        title: Text('Writable'),
+        subtitle: Text('${tech.isWritable}'),
+      ));
+      if (canMakeReadOnly != null)
+        ndefWidgets.add(FormRow(
+          title: Text('Can Make Read Only'),
+          subtitle: Text('$canMakeReadOnly'),
+        ));
+      if (cachedMessage != null)
+        Iterable.generate(cachedMessage.records.length).forEach((i) {
+          final record = cachedMessage.records[i];
+          final info = NdefRecordInfo.fromNdef(record);
+          ndefWidgets.add(FormRow(
+            title: Text('#$i ${info.title}'),
+            subtitle: Text('${info.subtitle}'),
+            trailing: Icon(Icons.chevron_right),
+            onTap: () => Navigator.push(context, MaterialPageRoute(
+              builder: (context) => NdefRecordPage(i, record),
+            )),
+          ));
+        });
+    }
+
+    return [
+      FormSection(
+        header: Text('TAG'),
+        children: tagWidgets,
+      ),
+      if (ndefWidgets.isNotEmpty)
+        FormSection(
+          header: Text('NDEF'),
+          children: ndefWidgets,
+        ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,321 +356,31 @@ class TagReadPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('Tag - Read'),
       ),
-      body: SafeArea(
-        child: Consumer<TagReadModel>(
-          builder: (context, model, child) => ListView(
-            padding: EdgeInsets.all(2),
-            children: [
-              ListCellGroup(children: [
-                ListCellButton(
-                  title: Text('Start a scan'),
+      body: Consumer<TagReadModel>(
+        builder: (context, model, _) => ListView(
+          padding: EdgeInsets.all(2),
+          children: [
+            FormSection(
+              children: [
+                FormRow(
+                  title: Text('Start Session', style: TextStyle(color: Theme.of(context).accentColor)),
                   onTap: () => startSession(
                     context: context,
                     handleTag: Provider.of<TagReadModel>(context, listen: false).handleTag,
                   ),
                 ),
-              ]),
-
-              if (model.tag != null && model.additionalData != null)
-                ..._buildTagWidgets(context, model.tag, model.additionalData)
-            ],
-          ),
+              ],
+            ),
+            if (model.tag != null && model.additionalData != null)
+              ..._buildTagWidgets(context, model.tag!, model.additionalData!)
+          ],
         ),
       ),
     );
   }
-
-  List<Widget> _buildTagWidgets(BuildContext context, NfcTag tag, Map additionalData) {
-    final tagWidgets = <Widget>[];
-    final ndefWidgets = <Widget>[];
-
-    if (Platform.isAndroid) {
-      tagWidgets.add(ListCell(
-        title: Text('Identifier'),
-        subtitle: Text(hexFromBytes(
-          NfcA.from(tag)?.identifier ??
-          NfcB.from(tag)?.identifier ??
-          NfcF.from(tag)?.identifier ??
-          NfcV.from(tag)?.identifier
-        )),
-      ));
-      tagWidgets.add(ListCell(
-        title: Text('Tech List'),
-        subtitle: Text(_getTechList(tag).join(' / ')),
-      ));
-
-      if (NfcA.from(tag) != null) {
-        final nfca = NfcA.from(tag);
-        tagWidgets.add(ListCell(
-          title: Text('NfcA - Atqa'),
-          subtitle: Text(hexFromBytes(nfca.atqa)),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('NfcA - Sak'),
-          subtitle: Text('${nfca.sak}'),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('NfcA - Max Transceive Length'),
-          subtitle: Text('${nfca.maxTransceiveLength}'),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('NfcA - Timeout'),
-          subtitle: Text('${nfca.timeout}'),
-        ));
-
-        if (MifareClassic.from(tag) != null) {
-          final mifareclassic = MifareClassic.from(tag);
-          tagWidgets.add(ListCell(
-            title: Text('MifareClassic - Type'),
-            subtitle: Text(_getMiFareClassicType(mifareclassic.type)),
-          ));
-          tagWidgets.add(ListCell(
-            title: Text('MifareClassic - Size'),
-            subtitle: Text('${mifareclassic.size}'),
-          ));
-          tagWidgets.add(ListCell(
-            title: Text('MifareClassic - Sector Count'),
-            subtitle: Text('${mifareclassic.sectorCount}'),
-          ));
-          tagWidgets.add(ListCell(
-            title: Text('MifareClassic - Block Count'),
-            subtitle: Text('${mifareclassic.blockCount}'),
-          ));
-          tagWidgets.add(ListCell(
-            title: Text('MifareClassic - Max Transceive Length'),
-            subtitle: Text('${mifareclassic.maxTransceiveLength}'),
-          ));
-          tagWidgets.add(ListCell(
-            title: Text('MifareClassic - Timeout'),
-            subtitle: Text('${mifareclassic.timeout}'),
-          ));
-        }
-
-        if (MifareUltralight.from(tag) != null) {
-          final mifareultralight = MifareUltralight.from(tag);
-          tagWidgets.add(ListCell(
-            title: Text('MifareUltralight - Type'),
-            subtitle: Text(_getMiFareUltralightType(mifareultralight.type)),
-          ));
-          tagWidgets.add(ListCell(
-            title: Text('MifareUltralight - Max Transceive Length'),
-            subtitle: Text('${mifareultralight.maxTransceiveLength}'),
-          ));
-          tagWidgets.add(ListCell(
-            title: Text('MifareUltralight - Timeout'),
-            subtitle: Text('${mifareultralight.timeout}'),
-          ));
-        }
-      }
-
-      if (NfcB.from(tag) != null) {
-        final nfcb = NfcB.from(tag);
-        tagWidgets.add(ListCell(
-          title: Text('NfcB - Application Data'),
-          subtitle: Text(hexFromBytes(nfcb.applicationData)),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('NfcB - Protocol Info'),
-          subtitle: Text(hexFromBytes(nfcb.protocolInfo)),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('NfcB - Max Transceive Length'),
-          subtitle: Text('${nfcb.maxTransceiveLength}'),
-        ));
-      }
-
-      if (NfcF.from(tag) != null) {
-        final nfcf = NfcF.from(tag);
-        tagWidgets.add(ListCell(
-          title: Text('NfcF - System Code'),
-          subtitle: Text(hexFromBytes(nfcf.systemCode)),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('NfcF - Manufacturer'),
-          subtitle: Text(hexFromBytes(nfcf.manufacturer)),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('NfcF - Max Transceive Length'),
-          subtitle: Text('${nfcf.maxTransceiveLength}'),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('NfcF - Timeout'),
-          subtitle: Text('${nfcf.timeout}'),
-        ));
-      }
-
-      if (NfcV.from(tag) != null) {
-        final nfcv = NfcV.from(tag);
-        tagWidgets.add(ListCell(
-          title: Text('NfcV - DsfId'),
-          subtitle: Text('${nfcv.dsfId}'),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('NfcV - Response Flags'),
-          subtitle: Text('${nfcv.responseFlags}'),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('NfcV - Max Transceive Length'),
-          subtitle: Text('${nfcv.maxTransceiveLength}'),
-        ));
-      }
-
-      if (IsoDep.from(tag) != null) {
-        final isodep = IsoDep.from(tag);
-        tagWidgets.add(ListCell(
-          title: Text('IsoDep - Hi Layer Response'),
-          subtitle: Text(hexFromBytes(isodep.hiLayerResponse)),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('IsoDep - Historical Bytes'),
-          subtitle: Text(hexFromBytes(isodep.historicalBytes)),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('IsoDep - Extended Length Apdu Supported'),
-          subtitle: Text('${isodep.isExtendedLengthApduSupported}'),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('IsoDep - Max Transceive Length'),
-          subtitle: Text('${isodep.maxTransceiveLength}'),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('IsoDep - Timeout'),
-          subtitle: Text('${isodep.timeout}'),
-        ));
-      }
-    }
-
-    if (Platform.isIOS) {
-      if (FeliCa.from(tag) != null) {
-        final felica = FeliCa.from(tag);
-        final manufacturerParameter = additionalData['manufacturerParameter'] as Uint8List;
-        tagWidgets.add(ListCell(
-          title: Text('Type'),
-          subtitle: Text('FeliCa'),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('Current IDm'),
-          subtitle: Text(hexFromBytes(felica.currentIDm)),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('Current System Code'),
-          subtitle: Text(hexFromBytes(felica.currentSystemCode)),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('Manufacturer Parameter'),
-          subtitle: Text(hexFromBytes(manufacturerParameter)),
-        ));
-      }
-
-      if (Iso15693.from(tag) != null) {
-        final iso15693 = Iso15693.from(tag);
-        tagWidgets.add(ListCell(
-          title: Text('Type'),
-          subtitle: Text('ISO15693'),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('Identifier'),
-          subtitle: Text(hexFromBytes(iso15693.identifier)),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('IC Serial Number'),
-          subtitle: Text(hexFromBytes(iso15693.icSerialNumber)),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('IC Manufacturer Code'),
-          subtitle: Text('${iso15693.icManufacturerCode}'),
-        ));
-      }
-
-      if (Iso7816.from(tag) != null) {
-        final iso7816 = Iso7816.from(tag);
-        tagWidgets.add(ListCell(
-          title: Text('Type'),
-          subtitle: Text('ISO7816'),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('Identifier'),
-          subtitle: Text(hexFromBytes(iso7816.identifier)),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('Initial Selected AID'),
-          subtitle: Text('${iso7816.initialSelectedAID}'),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('Application Data'),
-          subtitle: Text(hexFromBytes(iso7816.applicationData)),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('Historical Bytes'),
-          subtitle: Text(hexFromBytes(iso7816.historicalBytes)),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('Proprietary Application Data Coding'),
-          subtitle: Text('${iso7816.proprietaryApplicationDataCoding}'),
-        ));
-      }
-
-      if (MiFare.from(tag) != null) {
-        final mifare = MiFare.from(tag);
-        tagWidgets.add(ListCell(
-          title: Text('Type'),
-          subtitle: Text('MiFare ${_getMiFareFamily(mifare.mifareFamily)}'),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('Identifier'),
-          subtitle: Text(hexFromBytes(mifare.identifier)),
-        ));
-        tagWidgets.add(ListCell(
-          title: Text('Historical Bytes'),
-          subtitle: Text(hexFromBytes(mifare.historicalBytes)),
-        ));
-      }
-    }
-
-    if (Ndef.from(tag) != null) {
-      final ndef = Ndef.from(tag);
-      final canMakeReadOnly = ndef.additionalData['canMakeReadOnly'] as bool;
-      final type = ndef.additionalData['type'] as String;
-      if (type != null) ndefWidgets.add(ListCell(
-        title: Text('Type'),
-        subtitle: Text(_getNdefType(type)),
-      ));
-      ndefWidgets.add(ListCell(
-        title: Text('Size'),
-        subtitle: Text('${ndef.cachedMessage?.byteLength ?? 0} / ${ndef.maxSize} bytes'),
-      ));
-      ndefWidgets.add(ListCell(
-        title: Text('Writable'),
-        subtitle: Text('${ndef.isWritable}'),
-      ));
-      if (canMakeReadOnly != null) ndefWidgets.add(ListCell(
-        title: Text('Can Make Read Only'),
-        subtitle: Text('$canMakeReadOnly'),
-      ));
-      Iterable.generate(ndef.cachedMessage?.records?.length ?? 0).forEach((i) {
-        final record = ndef.cachedMessage.records[i];
-        final data = parseNdefRecord(record);
-        ndefWidgets.add(ListCell(
-          title: Text('#$i ${data['title']}'),
-          subtitle: Text('${data['subtitle']}'),
-          trailing: Icon(Icons.chevron_right),
-          onTap: () => Navigator.pushNamed(context, '/ndef_record', arguments: record),
-        ));
-      });
-    }
-
-    return [
-      ListHeader(label: Text('TAG')),
-      ListCellGroup(children: tagWidgets),
-      if (ndefWidgets.isNotEmpty) ...[
-        ListHeader(label: Text('NDEF')),
-        ListCellGroup(children: ndefWidgets),
-      ],
-    ];
-  }
 }
 
-List<String> _getTechList(NfcTag tag) {
+String _getTechListString(NfcTag tag) {
   final techList = <String>[];
   if (tag.data.containsKey('nfca'))
     techList.add('NfcA');
@@ -357,10 +400,10 @@ List<String> _getTechList(NfcTag tag) {
     techList.add('Ndef');
   if (tag.data.containsKey('ndefformatable'))
     techList.add('NdefFormatable');
-  return techList;
+  return techList.join(' / ');
 }
 
-String _getMiFareClassicType(int code) {
+String _getMiFareClassicTypeString(int code) {
   switch (code) {
     case 0:
       return 'Classic';
@@ -373,7 +416,7 @@ String _getMiFareClassicType(int code) {
   }
 }
 
-String _getMiFareUltralightType(int code) {
+String _getMiFareUltralightTypeString(int code) {
   switch (code) {
     case 1:
       return 'Ultralight';
@@ -384,7 +427,7 @@ String _getMiFareUltralightType(int code) {
   }
 }
 
-String _getMiFareFamily(MiFareFamily family) {
+String _getMiFareFamilyString(MiFareFamily family) {
   switch (family) {
     case MiFareFamily.unknown:
       return 'Unknown';
