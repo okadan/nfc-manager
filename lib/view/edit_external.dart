@@ -68,7 +68,7 @@ class EditExternalPage extends StatelessWidget {
               ),
             ),
             Container(
-              margin: EdgeInsets.only(top: 8),
+              margin: EdgeInsets.only(top: 12),
               child: TextFormField(
                 controller: Provider.of<EditExternalModel>(context, listen: false).typeController,
                 decoration: InputDecoration(labelText: 'Type', helperText: ''),
@@ -77,7 +77,7 @@ class EditExternalPage extends StatelessWidget {
               ),
             ),
             Container(
-              margin: EdgeInsets.only(top: 8),
+              margin: EdgeInsets.only(top: 12),
               child: TextFormField(
                 controller: Provider.of<EditExternalModel>(context, listen: false).dataController,
                 decoration: InputDecoration(labelText: 'Data', helperText: ''),
@@ -86,7 +86,7 @@ class EditExternalPage extends StatelessWidget {
               ),
             ),
             Container(
-              margin: EdgeInsets.only(top: 8),
+              margin: EdgeInsets.only(top: 12),
               child: ElevatedButton(
                 child: Text('Save'),
                 onPressed: () => Provider.of<EditExternalModel>(context, listen: false).save()

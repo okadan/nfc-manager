@@ -60,7 +60,7 @@ class EditTextPage extends StatelessWidget {
               ),
             ),
             Container(
-              margin: EdgeInsets.only(top: 8),
+              margin: EdgeInsets.only(top: 12),
               child: ElevatedButton(
                 child: Text('Save'),
                 onPressed: () => Provider.of<EditTextModel>(context, listen: false).save()

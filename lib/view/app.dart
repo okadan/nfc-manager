@@ -28,87 +28,72 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: _Home.create(),
-      theme: _createTheme(context),
-    );
-  }
-}
-
-class _Home extends StatelessWidget {
-  _Home._();
-
-  static Widget create() => _Home._();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('NFC Manager'),
+      theme: ThemeData(
+        inputDecorationTheme: InputDecorationTheme(
+          isDense: true,
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+          errorStyle: TextStyle(height: 0.75),
+          helperStyle: TextStyle(height: 0.75),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(style: ButtonStyle(
+          minimumSize: MaterialStateProperty.all(Size.fromHeight(40)),
+        )),
       ),
-      body: ListView(
-        padding: EdgeInsets.all(2),
-        children: [
-          FormSection(
-            children: [
-              FormRow(
-                title: Text('Tag - Read'),
-                trailing: Icon(Icons.chevron_right),
-                onTap: () => Navigator.push(context, MaterialPageRoute(
-                  builder: (context) => TagReadPage.create(),
-                )),
-              ),
-              FormRow(
-                title: Text('Ndef - Write'),
-                trailing: Icon(Icons.chevron_right),
-                onTap: () => Navigator.push(context, MaterialPageRoute(
-                  builder: (context) => NdefWritePage.create(),
-                )),
-              ),
-              FormRow(
-                title: Text('Ndef - Write Lock'),
-                trailing: Icon(Icons.chevron_right),
-                onTap: () => Navigator.push(context, MaterialPageRoute(
-                  builder: (context) => NdefWriteLockPage.create(),
-                )),
-              ),
-              if (Platform.isAndroid)
+      home: Builder(builder: (context) => Scaffold(
+        appBar: AppBar(
+          title: Text('NFC Manager'),
+        ),
+        body: ListView(
+          padding: EdgeInsets.all(2),
+          children: [
+            FormSection(
+              children: [
                 FormRow(
-                  title: Text('Ndef - Format'),
+                  title: Text('Tag - Read'),
                   trailing: Icon(Icons.chevron_right),
                   onTap: () => Navigator.push(context, MaterialPageRoute(
-                    builder: (context) => NdefFormatPage.create(),
+                    builder: (context) => TagReadPage.create(),
                   )),
                 ),
-            ],
-          ),
-          FormSection(
-            children: [
-              FormRow(
-                title: Text('About'),
-                trailing: Icon(Icons.chevron_right),
-                onTap: () => Navigator.push(context, MaterialPageRoute(
-                  builder: (context) => AboutPage.create(),
-                )),
-              ),
-            ],
-          ),
-        ],
-      ),
+                FormRow(
+                  title: Text('Ndef - Write'),
+                  trailing: Icon(Icons.chevron_right),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(
+                    builder: (context) => NdefWritePage.create(),
+                  )),
+                ),
+                FormRow(
+                  title: Text('Ndef - Write Lock'),
+                  trailing: Icon(Icons.chevron_right),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(
+                    builder: (context) => NdefWriteLockPage.create(),
+                  )),
+                ),
+                if (Platform.isAndroid)
+                  FormRow(
+                    title: Text('Ndef - Format'),
+                    trailing: Icon(Icons.chevron_right),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(
+                      builder: (context) => NdefFormatPage.create(),
+                    )),
+                  ),
+              ],
+            ),
+            FormSection(
+              children: [
+                FormRow(
+                  title: Text('About'),
+                  trailing: Icon(Icons.chevron_right),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(
+                    builder: (context) => AboutPage.create(),
+                  )),
+                ),
+              ],
+            ),
+          ],
+        ),
+      )),
     );
   }
-}
-
-ThemeData _createTheme(BuildContext context) {
-  return ThemeData(
-    inputDecorationTheme: InputDecorationTheme(
-      isDense: true,
-      border: OutlineInputBorder(),
-      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-      errorStyle: TextStyle(height: 0.7),
-      helperStyle: TextStyle(height: 0.7),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(style: ButtonStyle(
-      minimumSize: MaterialStateProperty.all(Size.fromHeight(40)),
-    )),
-  );
 }

@@ -135,7 +135,5 @@ String _typeNameFormatToString(NdefTypeNameFormat format) {
       return 'Unknown';
     case NdefTypeNameFormat.unchanged:
       return 'Unchanged';
-    default:
-      return 'NA';
   }
 }

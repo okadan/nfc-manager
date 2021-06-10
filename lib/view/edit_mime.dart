@@ -65,7 +65,7 @@ class EditMimePage extends StatelessWidget {
               ),
             ),
             Container(
-              margin: EdgeInsets.only(top: 8),
+              margin: EdgeInsets.only(top: 12),
               child: TextFormField(
                 controller: Provider.of<EditMimeModel>(context, listen: false).dataController,
                 decoration: InputDecoration(labelText: 'Data', helperText: ''),
@@ -74,7 +74,7 @@ class EditMimePage extends StatelessWidget {
               ),
             ),
             Container(
-              margin: EdgeInsets.only(top: 8),
+              margin: EdgeInsets.only(top: 12),
               child: ElevatedButton(
                 child: Text('Save'),
                 onPressed: () => Provider.of<EditMimeModel>(context, listen: false).save()
