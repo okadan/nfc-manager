@@ -8,7 +8,19 @@ Future<void> startSession({
   required Future<String?> Function(NfcTag) handleTag,
   String alertMessage = 'Hold your device near the item.',
 }) async {
-  if (Platform.isIOS) {
+  if (!(await NfcManager.instance.isAvailable()))
+    return showDialog(
+      context: context,
+      builder: (context) => _UnavailableDialog(),
+    );
+
+  if (Platform.isAndroid)
+    return showDialog(
+      context: context,
+      builder: (context) => _AndroidSessionDialog(alertMessage, handleTag),
+    );
+
+  if (Platform.isIOS)
     return NfcManager.instance.startSession(
       alertMessage: alertMessage,
       onDiscovered: (tag) async {
@@ -21,25 +33,38 @@ Future<void> startSession({
         }
       },
     );
-  }
-  return showDialog(
-    context: context,
-    builder: (context) => _AndroidNfcSessionDialog(alertMessage, handleTag),
-  );
+
+  throw('unsupported platform: ${Platform.operatingSystem}');
 }
 
-class _AndroidNfcSessionDialog extends StatefulWidget {
-  const _AndroidNfcSessionDialog(this.alertMessage, this.handleTag);
+class _UnavailableDialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Error'),
+      content: Text('NFC may not be supported or may be temporarily turned off.'),
+      actions: [
+        TextButton(
+          child: Text('GOT IT'),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
+    );
+  }
+}
+
+class _AndroidSessionDialog extends StatefulWidget {
+  const _AndroidSessionDialog(this.alertMessage, this.handleTag);
 
   final String alertMessage;
 
   final Future<String?> Function(NfcTag tag) handleTag;
 
   @override
-  State<StatefulWidget> createState() => _AndroidNfcSessionDialogState();
+  State<StatefulWidget> createState() => _AndroidSessionDialogState();
 }
 
-class _AndroidNfcSessionDialogState extends State<_AndroidNfcSessionDialog> {
+class _AndroidSessionDialogState extends State<_AndroidSessionDialog> {
   String? _alertMessage;
 
   String? _errorMessage;
