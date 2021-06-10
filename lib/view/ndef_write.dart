@@ -186,6 +186,10 @@ class _WriteRecordFormRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 ListTile(
+                  visualDensity: VisualDensity.compact,
+                  title: Text('#$index ${info.title}', style: TextStyle(color: Theme.of(context).textTheme.caption?.color)),
+                ),
+                ListTile(
                   title: Text('View Details'),
                   onTap: () => Navigator.pop(context, 'view_details'),
                 ),
@@ -219,7 +223,7 @@ class _WriteRecordFormRow extends StatelessWidget {
               context: context,
               builder: (context) => AlertDialog(
                 title: Text('Delete Record?'),
-                content: Text('#$index ${info.title}\n${info.subtitle}'),
+                content: Text('#$index ${info.title}'),
                 actions: [
                   TextButton(
                     child: Text('CANCEL'),
