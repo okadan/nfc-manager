@@ -105,6 +105,9 @@ ThemeData _themeData(Brightness brightness) {
       800: Color(0xFF346FFE),
       900: Color(0xFF255CFD),
     }),
+    appBarTheme: AppBarTheme(
+      brightness: Brightness.dark,
+    ),
     inputDecorationTheme: InputDecorationTheme(
       isDense: true,
       border: OutlineInputBorder(),
@@ -118,11 +121,9 @@ ThemeData _themeData(Brightness brightness) {
     scaffoldBackgroundColor: brightness == Brightness.dark
       ? Colors.black
       : null,
-    cardTheme: CardTheme(
-      color: brightness == Brightness.dark
-        ? Color.fromARGB(255, 28, 28, 30)
-        : null,
-    ),
+    cardColor: brightness == Brightness.dark
+      ? Color.fromARGB(255, 28, 28, 30)
+      : null,
     dialogTheme: DialogTheme(
       backgroundColor: brightness == Brightness.dark
         ? Color.fromARGB(255, 28, 28, 30)

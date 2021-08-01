@@ -86,7 +86,7 @@ class FormSection extends StatelessWidget {
             margin: EdgeInsets.symmetric(horizontal: 2),
             decoration: BoxDecoration(
               border: Border.all(width: 1, color: Theme.of(context).dividerColor),
-              color: Theme.of(context).cardTheme.color,
+              color: Theme.of(context).cardColor,
             ),
             child: Column(
               children: List.generate(
