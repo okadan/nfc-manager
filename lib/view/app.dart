@@ -92,6 +92,19 @@ class _Home extends StatelessWidget {
 ThemeData _themeData(Brightness brightness) {
   return ThemeData(
     brightness: brightness,
+     // Matches app icon color.
+    primarySwatch:  MaterialColor(0xFF4D8CFE, <int, Color>{
+      50: Color(0xFFEAF1FF),
+      100: Color(0xFFCADDFF),
+      200: Color(0xFFA6C6FF),
+      300: Color(0xFF82AFFE),
+      400: Color(0xFF689DFE),
+      500: Color(0xFF4D8CFE),
+      600: Color(0xFF4684FE),
+      700: Color(0xFF3D79FE),
+      800: Color(0xFF346FFE),
+      900: Color(0xFF255CFD),
+    }),
     inputDecorationTheme: InputDecorationTheme(
       isDense: true,
       border: OutlineInputBorder(),
