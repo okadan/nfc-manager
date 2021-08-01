@@ -21,7 +21,7 @@ class RepositoryImpl implements Repository {
   Future<WriteRecord> createOrUpdateWriteRecord(WriteRecord record) async {
     final id = await _db.insert('record', record.toJson(), conflictAlgorithm: ConflictAlgorithm.replace);
     _subscriptionManager.publish();
-    return WriteRecord.fromJson(record.toJson()..[WriteRecord.ID] = id); // FIX: copyWith
+    return WriteRecord.fromJson(record.toJson()..[WriteRecord.ID] = id); // todo: copyWith
   }
 
   @override

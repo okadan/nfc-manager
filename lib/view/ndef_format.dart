@@ -24,11 +24,9 @@ class NdefFormatModel with ChangeNotifier {
 }
 
 class NdefFormatPage extends StatelessWidget {
-  NdefFormatPage._();
-
-  static Widget create() => ChangeNotifierProvider<NdefFormatModel>(
+  static Widget withDependency() => ChangeNotifierProvider<NdefFormatModel>(
     create: (context) => NdefFormatModel(),
-    child: NdefFormatPage._(),
+    child: NdefFormatPage(),
   );
 
   @override
@@ -40,17 +38,15 @@ class NdefFormatPage extends StatelessWidget {
       body: ListView(
         padding: EdgeInsets.all(2),
         children: [
-          FormSection(
-            children: [
-              FormRow(
-                title: Text('Start Session', style: TextStyle(color: Theme.of(context).accentColor)),
-                onTap: () => startSession(
-                  context: context,
-                  handleTag: Provider.of<NdefFormatModel>(context, listen: false).handleTag,
-                )
+          FormSection(children: [
+            FormRow(
+              title: Text('Start Session', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+              onTap: () => startSession(
+                context: context,
+                handleTag: Provider.of<NdefFormatModel>(context, listen: false).handleTag,
               ),
-            ],
-          ),
+            ),
+          ]),
         ],
       ),
     );

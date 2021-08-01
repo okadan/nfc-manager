@@ -12,9 +12,9 @@ class NdefWriteLockModel with ChangeNotifier {
     if (tech == null)
       throw('Tag is not ndef.');
 
-    // check android-specific property.
+    // Check android-specific property.
     if (tech.additionalData['canMakeReadOnly'] == false)
-      throw('The operation is not allowed on this tag.');
+      throw('This operation is not allowed on this tag.');
 
     try {
       await tech.writeLock();
@@ -27,11 +27,9 @@ class NdefWriteLockModel with ChangeNotifier {
 }
 
 class NdefWriteLockPage extends StatelessWidget {
-  NdefWriteLockPage._();
-
-  static Widget create() => ChangeNotifierProvider<NdefWriteLockModel>(
+  static Widget withDependency() => ChangeNotifierProvider<NdefWriteLockModel>(
     create: (context) => NdefWriteLockModel(),
-    child: NdefWriteLockPage._(),
+    child: NdefWriteLockPage(),
   );
 
   @override
@@ -43,40 +41,29 @@ class NdefWriteLockPage extends StatelessWidget {
       body: ListView(
         padding: EdgeInsets.all(2),
         children: [
-          FormSection(
-            children: [
-              FormRow(
-                title: Text('Start Session', style: TextStyle(color: Theme.of(context).accentColor)),
-                onTap: () async {
-                  final result = await showDialog<bool>(
+          FormSection(children: [
+            FormRow(
+              title: Text('Start Session', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+              onTap: () async {
+                final result = await showDialog<bool>(context: context, builder: (context) => AlertDialog(
+                  title: Text('Warning'),
+                  content: Text(
+                    'This is a permanent action that you cannot undo. '
+                    'After locking the tag, you can no longer write data to it.',
+                  ),
+                  actions: [
+                    TextButton(child: Text('CANCEL'), onPressed: () => Navigator.pop(context)),
+                    TextButton(child: Text('START'), onPressed: () => Navigator.pop(context, true)),
+                  ],
+                ));
+                if (result == true)
+                  startSession(
                     context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text('Warning'),
-                      content: Text(
-                        'This is a permanent action that you cannot undo. '
-                        'After locking the tag, you can no longer write data to it.',
-                      ),
-                      actions: [
-                        TextButton(
-                          child: Text('CANCEL'),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                        TextButton(
-                          child: Text('START'),
-                          onPressed: () => Navigator.pop(context, true),
-                        ),
-                      ],
-                    ),
+                    handleTag: Provider.of<NdefWriteLockModel>(context, listen: false).handleTag,
                   );
-                  if (result == true)
-                    startSession(
-                      context: context,
-                      handleTag: Provider.of<NdefWriteLockModel>(context, listen: false).handleTag,
-                    );
-                },
-              ),
-            ],
-          ),
+              },
+            ),
+          ]),
         ],
       ),
     );

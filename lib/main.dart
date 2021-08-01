@@ -3,5 +3,5 @@ import 'package:flutter/widgets.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(await App.create());
+  runApp(await App.withDependency());
 }

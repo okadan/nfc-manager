@@ -21,7 +21,7 @@ class EditTextModel with ChangeNotifier {
       throw('Form is invalid.');
 
     final record = WellknownTextRecord(
-      languageCode: 'en', // FIX:
+      languageCode: 'en', // todo:
       text: textController.text,
     );
 
@@ -33,11 +33,9 @@ class EditTextModel with ChangeNotifier {
 }
 
 class EditTextPage extends StatelessWidget {
-  EditTextPage._();
-
-  static Widget create([WriteRecord? record]) => ChangeNotifierProvider<EditTextModel>(
+  static Widget withDependency([WriteRecord? record]) => ChangeNotifierProvider<EditTextModel>(
     create: (context) => EditTextModel(Provider.of(context, listen: false), record),
-    child: EditTextPage._(),
+    child: EditTextPage(),
   );
 
   @override
@@ -51,22 +49,18 @@ class EditTextPage extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.all(24),
           children: [
-            Container(
-              child: TextFormField(
-                controller: Provider.of<EditTextModel>(context, listen: false).textController,
-                decoration: InputDecoration(labelText: 'Text', helperText: ''),
-                keyboardType: TextInputType.text,
-                validator: (value) => value?.isNotEmpty != true ? 'Required' : null,
-              ),
+            TextFormField(
+              controller: Provider.of<EditTextModel>(context, listen: false).textController,
+              decoration: InputDecoration(labelText: 'Text', helperText: ''),
+              keyboardType: TextInputType.text,
+              validator: (value) => value?.isNotEmpty != true ? 'Required' : null,
             ),
-            Container(
-              margin: EdgeInsets.only(top: 12),
-              child: ElevatedButton(
-                child: Text('Save'),
-                onPressed: () => Provider.of<EditTextModel>(context, listen: false).save()
-                  .then((_) => Navigator.pop(context))
-                  .catchError((e) => print('=== $e ===')),
-              ),
+            SizedBox(height: 12),
+            ElevatedButton(
+              child: Text('Save'),
+              onPressed: () => Provider.of<EditTextModel>(context, listen: false).save()
+                .then((_) => Navigator.pop(context))
+                .catchError((e) => print('=== $e ===')),
             ),
           ],
         ),

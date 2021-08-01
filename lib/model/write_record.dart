@@ -1,7 +1,7 @@
 import 'package:nfc_manager/nfc_manager.dart';
 
 class WriteRecord {
-  const WriteRecord({required this.id, required this.record});
+  WriteRecord({required this.id, required this.record});
 
   static const ID = 'id';
   final int? id;

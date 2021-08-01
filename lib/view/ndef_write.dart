@@ -47,11 +47,9 @@ class NdefWriteModel with ChangeNotifier {
 }
 
 class NdefWritePage extends StatelessWidget {
-  NdefWritePage._();
-
-  static Widget create() => ChangeNotifierProvider<NdefWriteModel>(
+  static Widget withDependency() => ChangeNotifierProvider<NdefWriteModel>(
     create: (context) => NdefWriteModel(Provider.of(context, listen: false)),
-    child: NdefWritePage._(),
+    child: NdefWritePage(),
   );
 
   @override
@@ -65,96 +63,94 @@ class NdefWritePage extends StatelessWidget {
         builder: (context, ss) => ListView(
           padding: EdgeInsets.all(2),
           children: [
-            FormSection(
-              children: [
-                FormRow(
-                  title: Text('Add Record'),
-                  trailing: Icon(Icons.chevron_right),
-                  onTap: () async {
-                    final result = await showDialog<String>(
-                      context: context,
-                      builder: (context) => SimpleDialog(
-                        title: Text('Record Types'),
-                        children: [
-                          SimpleDialogOption(
-                            child: Text('Text'),
-                            onPressed: () => Navigator.pop(context, 'text'),
-                          ),
-                          SimpleDialogOption(
-                            child: Text('Uri'),
-                            onPressed: () => Navigator.pop(context, 'uri'),
-                          ),
-                          SimpleDialogOption(
-                            child: Text('Mime'),
-                            onPressed: () => Navigator.pop(context, 'mime'),
-                          ),
-                          SimpleDialogOption(
-                            child: Text('External'),
-                            onPressed: () => Navigator.pop(context, 'external'),
-                          ),
-                        ],
-                      ),
-                    );
-                    switch (result) {
-                      case 'text':
-                        Navigator.push(context, MaterialPageRoute(
-                          fullscreenDialog: true,
-                          builder: (context) => EditTextPage.create(),
-                        ));
-                        break;
-                      case 'uri':
-                        Navigator.push(context, MaterialPageRoute(
-                          fullscreenDialog: true,
-                          builder: (context) => EditUriPage.create(),
-                        ));
-                        break;
-                      case 'mime':
-                        Navigator.push(context, MaterialPageRoute(
-                          fullscreenDialog: true,
-                          builder: (context) => EditMimePage.create(),
-                        ));
-                        break;
-                      case 'external':
-                        Navigator.push(context, MaterialPageRoute(
-                          fullscreenDialog: true,
-                          builder: (context) => EditExternalPage.create(),
-                        ));
-                        break;
-                      case null:
-                        break;
-                      default:
-                        throw('unsupported result: $result');
-                    }
-                  },
-                ),
-                FormRow(
-                  title: Text('Start Session', style: TextStyle(color: ss.data?.isNotEmpty != true
-                    ? Theme.of(context).disabledColor
-                    : Theme.of(context).accentColor),
-                  ),
-                  onTap: ss.data?.isNotEmpty != true
-                    ? null
-                    : () => startSession(
-                      context: context,
-                      handleTag: (tag) => Provider.of<NdefWriteModel>
-                        (context, listen: false).handleTag(tag, ss.data!),
+            FormSection(children: [
+              FormRow(
+                title: Text('Add Record'),
+                trailing: Icon(Icons.chevron_right),
+                onTap: () async {
+                  final result = await showDialog<String>(
+                    context: context,
+                    builder: (context) => SimpleDialog(
+                      title: Text('Record Types'),
+                      children: [
+                        SimpleDialogOption(
+                          child: Text('Text'),
+                          onPressed: () => Navigator.pop(context, 'text'),
+                        ),
+                        SimpleDialogOption(
+                          child: Text('Uri'),
+                          onPressed: () => Navigator.pop(context, 'uri'),
+                        ),
+                        SimpleDialogOption(
+                          child: Text('Mime'),
+                          onPressed: () => Navigator.pop(context, 'mime'),
+                        ),
+                        SimpleDialogOption(
+                          child: Text('External'),
+                          onPressed: () => Navigator.pop(context, 'external'),
+                        ),
+                      ],
                     ),
-                ),
-              ],
-            ),
-            if (ss.data?.isNotEmpty == true) FormSection(
-              header: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('RECORDS'),
-                  Text('${ss.data!.map((e) => e.record.byteLength).reduce((a, b) => a + b)} bytes'),
-                ],
+                  );
+                  switch (result) {
+                    case 'text':
+                      Navigator.push(context, MaterialPageRoute(
+                        fullscreenDialog: true,
+                        builder: (context) => EditTextPage.withDependency(),
+                      ));
+                      break;
+                    case 'uri':
+                      Navigator.push(context, MaterialPageRoute(
+                        fullscreenDialog: true,
+                        builder: (context) => EditUriPage.withDependency(),
+                      ));
+                      break;
+                    case 'mime':
+                      Navigator.push(context, MaterialPageRoute(
+                        fullscreenDialog: true,
+                        builder: (context) => EditMimePage.withDependency(),
+                      ));
+                      break;
+                    case 'external':
+                      Navigator.push(context, MaterialPageRoute(
+                        fullscreenDialog: true,
+                        builder: (context) => EditExternalPage.withDependency(),
+                      ));
+                      break;
+                    case null:
+                      break;
+                    default:
+                      throw('unsupported: result=$result');
+                  }
+                },
               ),
-              children: List.generate(ss.data!.length, (i) {
-                final record = ss.data!.elementAt(i);
-                return _WriteRecordFormRow(i, record);
-              }),
-            ),
+              FormRow(
+                title: Text('Start Session', style: TextStyle(color: ss.data?.isNotEmpty != true
+                  ? Theme.of(context).disabledColor
+                  : Theme.of(context).colorScheme.primary,
+                )),
+                onTap: ss.data?.isNotEmpty != true
+                  ? null
+                  : () => startSession(
+                    context: context,
+                    handleTag: (tag) => Provider.of<NdefWriteModel>(context, listen: false).handleTag(tag, ss.data!),
+                  ),
+              ),
+            ]),
+            if (ss.data?.isNotEmpty == true)
+              FormSection(
+                header: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('RECORDS'),
+                    Text('${ss.data!.map((e) => e.record.byteLength).reduce((a, b) => a + b)} bytes'),
+                  ],
+                ),
+                children: List.generate(ss.data!.length, (i) {
+                  final record = ss.data!.elementAt(i);
+                  return _WriteRecordFormRow(i, record);
+                }),
+              ),
           ],
         ),
       ),
@@ -163,7 +159,7 @@ class NdefWritePage extends StatelessWidget {
 }
 
 class _WriteRecordFormRow extends StatelessWidget {
-  const _WriteRecordFormRow(this.index, this.record);
+  _WriteRecordFormRow(this.index, this.record);
 
   final int index;
 
@@ -172,7 +168,7 @@ class _WriteRecordFormRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final info = NdefRecordInfo.fromNdef(record.record);
-    final editPageBuilder = _kEditPageBuilderTable[info.record.runtimeType];
+    final editPageBuilder = _editPageBuilders[info.record.runtimeType];
     return FormRow(
       title: Text('#$index ${info.title}'),
       subtitle: Text('${info.subtitle}'),
@@ -186,8 +182,14 @@ class _WriteRecordFormRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 ListTile(
-                  visualDensity: VisualDensity.compact,
-                  title: Text('#$index ${info.title}', style: TextStyle(color: Theme.of(context).textTheme.caption?.color)),
+                  visualDensity: VisualDensity(
+                    horizontal: VisualDensity.minimumDensity,
+                    vertical: VisualDensity.minimumDensity,
+                  ),
+                  title: Text(
+                    '#$index ${info.title}',
+                    style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 14),
+                  ),
                 ),
                 ListTile(
                   title: Text('View Details'),
@@ -213,6 +215,7 @@ class _WriteRecordFormRow extends StatelessWidget {
             ));
             break;
           case 'edit':
+            assert(editPageBuilder != null);
             Navigator.push(context, MaterialPageRoute(
               fullscreenDialog: true,
               builder: (context) => editPageBuilder!(record),
@@ -237,8 +240,8 @@ class _WriteRecordFormRow extends StatelessWidget {
               ),
             );
             if (result == true)
-              Provider.of<NdefWriteModel>(context, listen: false).delete(record)
-                .catchError((e) => print('=== $e ==='));
+              Provider.of<NdefWriteModel>(context, listen: false)
+                .delete(record).catchError((e) => print('=== $e ==='));
             break;
           case null:
             break;
@@ -250,9 +253,11 @@ class _WriteRecordFormRow extends StatelessWidget {
   }
 }
 
-final Map<Type, Widget Function(WriteRecord)> _kEditPageBuilderTable = Map.unmodifiable({
-  WellknownTextRecord: (record) => EditTextPage.create(record),
-  WellknownUriRecord: (record) => EditUriPage.create(record),
-  MimeRecord: (record) => EditMimePage.create(record),
-  ExternalRecord: (record) => EditExternalPage.create(record),
-});
+final _editPageBuilders = Map<Type, Widget Function(WriteRecord)>.unmodifiable(
+  <Type, Widget Function(WriteRecord)>{
+    WellknownTextRecord: (record) => EditTextPage.withDependency(record),
+    WellknownUriRecord: (record) => EditUriPage.withDependency(record),
+    MimeRecord: (record) => EditMimePage.withDependency(record),
+    ExternalRecord: (record) => EditExternalPage.withDependency(record),
+  },
+);

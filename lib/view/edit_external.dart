@@ -41,11 +41,9 @@ class EditExternalModel with ChangeNotifier {
 }
 
 class EditExternalPage extends StatelessWidget {
-  EditExternalPage._();
-
-  static Widget create([WriteRecord? record]) => ChangeNotifierProvider<EditExternalModel>(
+  static Widget withDependency([WriteRecord? record]) => ChangeNotifierProvider<EditExternalModel>(
     create: (context) => EditExternalModel(Provider.of(context, listen: false), record),
-    child: EditExternalPage._(),
+    child: EditExternalPage(),
   );
 
   @override
@@ -59,40 +57,32 @@ class EditExternalPage extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.all(24),
           children: [
-            Container(
-              child: TextFormField(
-                controller: Provider.of<EditExternalModel>(context, listen: false).domainController,
-                decoration: InputDecoration(labelText: 'Domain',  helperText: ''),
-                keyboardType: TextInputType.text,
-                validator: (value) => value?.isNotEmpty != true ? 'Required' : null,
-              ),
+            TextFormField(
+              controller: Provider.of<EditExternalModel>(context, listen: false).domainController,
+              decoration: InputDecoration(labelText: 'Domain',  helperText: ''),
+              keyboardType: TextInputType.text,
+              validator: (value) => value?.isNotEmpty != true ? 'Required' : null,
             ),
-            Container(
-              margin: EdgeInsets.only(top: 12),
-              child: TextFormField(
-                controller: Provider.of<EditExternalModel>(context, listen: false).typeController,
-                decoration: InputDecoration(labelText: 'Type', helperText: ''),
-                keyboardType: TextInputType.text,
-                validator: (value) => value?.isNotEmpty != true ? 'Required' : null,
-              ),
+            SizedBox(height: 12),
+            TextFormField(
+              controller: Provider.of<EditExternalModel>(context, listen: false).typeController,
+              decoration: InputDecoration(labelText: 'Type', helperText: ''),
+              keyboardType: TextInputType.text,
+              validator: (value) => value?.isNotEmpty != true ? 'Required' : null,
             ),
-            Container(
-              margin: EdgeInsets.only(top: 12),
-              child: TextFormField(
-                controller: Provider.of<EditExternalModel>(context, listen: false).dataController,
-                decoration: InputDecoration(labelText: 'Data', helperText: ''),
-                keyboardType: TextInputType.text,
-                validator: (value) => value?.isNotEmpty != true ? 'Required' : null,
-              ),
+            SizedBox(height: 12),
+            TextFormField(
+              controller: Provider.of<EditExternalModel>(context, listen: false).dataController,
+              decoration: InputDecoration(labelText: 'Data', helperText: ''),
+              keyboardType: TextInputType.text,
+              validator: (value) => value?.isNotEmpty != true ? 'Required' : null,
             ),
-            Container(
-              margin: EdgeInsets.only(top: 12),
-              child: ElevatedButton(
-                child: Text('Save'),
-                onPressed: () => Provider.of<EditExternalModel>(context, listen: false).save()
-                  .then((_) => Navigator.pop(context))
-                  .catchError((e) => print('=== $e ===')),
-              ),
+            SizedBox(height: 12),
+            ElevatedButton(
+              child: Text('Save'),
+              onPressed: () => Provider.of<EditExternalModel>(context, listen: false).save()
+                .then((_) => Navigator.pop(context))
+                .catchError((e) => print('=== $e ===')),
             ),
           ],
         ),

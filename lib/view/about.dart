@@ -4,10 +4,6 @@ import 'package:package_info/package_info.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutPage extends StatelessWidget {
-  AboutPage._();
-
-  static Widget create() => AboutPage._();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,32 +15,28 @@ class AboutPage extends StatelessWidget {
         children: [
           FutureBuilder<PackageInfo>(
             future: PackageInfo.fromPlatform(),
-            builder: (context, ss) => FormSection(
-              children: [
-                FormRow(
-                  title: Text('App Name'),
-                  trailing: Text('${ss.data?.appName ?? ''}'),
-                ),
-                FormRow(
-                  title: Text('Version'),
-                  trailing: Text('${ss.data?.version ?? ''}'),
-                ),
-                FormRow(
-                  title: Text('Build Number'),
-                  trailing: Text('${ss.data?.buildNumber ?? ''}'),
-                ),
-              ],
-            ),
-          ),
-          FormSection(
-            children: [
+            builder: (context, ss) => FormSection(children: [
               FormRow(
-                title: Text('Privacy Policy'),
-                trailing: Icon(Icons.open_in_new),
-                onTap: () => launch('https://nfcmanager.naokiokada.com/privacy-policy/'),
+                title: Text('App Name'),
+                trailing: Text(ss.data?.appName ?? ''),
               ),
-            ],
+              FormRow(
+                title: Text('Version'),
+                trailing: Text(ss.data?.version ?? ''),
+              ),
+              FormRow(
+                title: Text('Build Number'),
+                trailing: Text(ss.data?.buildNumber ?? ''),
+              ),
+            ]),
           ),
+          FormSection(children: [
+            FormRow(
+              title: Text('Privacy Policy'),
+              trailing: Icon(Icons.open_in_new),
+              onTap: () => launch('https://nfcmanager.naokiokada.com/privacy-policy/'),
+            ),
+          ]),
         ],
       ),
     );

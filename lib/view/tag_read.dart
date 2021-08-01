@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:app/extension/extension.dart';
+import 'package:app/utility/extensions.dart';
 import 'package:app/view/common/form_row.dart';
 import 'package:app/view/common/nfc_session.dart';
 import 'package:app/view/ndef_record.dart';
@@ -19,8 +19,9 @@ class TagReadModel with ChangeNotifier {
     this.tag = tag;
     additionalData = {};
 
-    // FIX: more additional data
     Object? tech;
+
+    // todo: more additional data
     if (Platform.isIOS) {
       tech = FeliCa.from(tag);
       if (tech is FeliCa) {
@@ -39,16 +40,54 @@ class TagReadModel with ChangeNotifier {
 }
 
 class TagReadPage extends StatelessWidget {
-  TagReadPage._();
-
-  static Widget create() => ChangeNotifierProvider<TagReadModel>(
+  static Widget withDependency() => ChangeNotifierProvider<TagReadModel>(
     create: (context) => TagReadModel(),
-    child: TagReadPage._(),
+    child: TagReadPage(),
   );
 
-  List<Widget> _buildTagWidgets(
-    BuildContext context, NfcTag tag, Map<String, dynamic> additionalData,
-  ) {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Tag - Read'),
+      ),
+      body: ListView(
+        padding: EdgeInsets.all(2),
+        children: [
+          FormSection(
+            children: [
+              FormRow(
+                title: Text('Start Session', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+                onTap: () => startSession(
+                  context: context,
+                  handleTag: Provider.of<TagReadModel>(context, listen: false).handleTag,
+                ),
+              ),
+            ],
+          ),
+          // consider: Selector<Tuple<{TAG}, {ADDITIONAL_DATA}>>
+          Consumer<TagReadModel>(builder: (context, model, _) {
+            final tag = model.tag;
+            final additionalData = model.additionalData;
+            if (tag != null && additionalData != null)
+              return _TagInfo(tag, additionalData);
+            return SizedBox.shrink();
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+class _TagInfo extends StatelessWidget {
+  _TagInfo(this.tag, this.additionalData);
+
+  final NfcTag tag;
+
+  final Map<String, dynamic> additionalData;
+
+  @override
+  Widget build(BuildContext context) {
     final tagWidgets = <Widget>[];
     final ndefWidgets = <Widget>[];
 
@@ -337,45 +376,18 @@ class TagReadPage extends StatelessWidget {
         });
     }
 
-    return [
-      FormSection(
-        header: Text('TAG'),
-        children: tagWidgets,
-      ),
-      if (ndefWidgets.isNotEmpty)
+    return Column(
+      children: [
         FormSection(
-          header: Text('NDEF'),
-          children: ndefWidgets,
+          header: Text('TAG'),
+          children: tagWidgets,
         ),
-    ];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Tag - Read'),
-      ),
-      body: Consumer<TagReadModel>(
-        builder: (context, model, _) => ListView(
-          padding: EdgeInsets.all(2),
-          children: [
-            FormSection(
-              children: [
-                FormRow(
-                  title: Text('Start Session', style: TextStyle(color: Theme.of(context).accentColor)),
-                  onTap: () => startSession(
-                    context: context,
-                    handleTag: Provider.of<TagReadModel>(context, listen: false).handleTag,
-                  ),
-                ),
-              ],
-            ),
-            if (model.tag != null && model.additionalData != null)
-              ..._buildTagWidgets(context, model.tag!, model.additionalData!)
-          ],
-        ),
-      ),
+        if (ndefWidgets.isNotEmpty)
+          FormSection(
+            header: Text('NDEF'),
+            children: ndefWidgets,
+          ),
+      ],
     );
   }
 }

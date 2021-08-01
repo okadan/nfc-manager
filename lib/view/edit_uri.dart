@@ -32,11 +32,9 @@ class EditUriModel with ChangeNotifier {
 }
 
 class EditUriPage extends StatelessWidget {
-  EditUriPage._();
-
-  static Widget create([WriteRecord? record]) => ChangeNotifierProvider<EditUriModel>(
+  static Widget withDependency([WriteRecord? record]) => ChangeNotifierProvider<EditUriModel>(
     create: (context) => EditUriModel(Provider.of(context, listen: false), record),
-    child: EditUriPage._(),
+    child: EditUriPage(),
   );
 
   @override
@@ -50,22 +48,18 @@ class EditUriPage extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.all(24),
           children: [
-            Container(
-              child: TextFormField(
-                controller: Provider.of<EditUriModel>(context, listen: false).uriController,
-                decoration: InputDecoration(labelText: 'Uri', hintText: 'http://example.com', helperText: ''),
-                keyboardType: TextInputType.url,
-                validator: (value) => value?.isNotEmpty != true ? 'Required' : Uri.tryParse(value!) == null ? 'Invalid' : null,
-              ),
+            TextFormField(
+              controller: Provider.of<EditUriModel>(context, listen: false).uriController,
+              decoration: InputDecoration(labelText: 'Uri', hintText: 'http://example.com', helperText: ''),
+              keyboardType: TextInputType.url,
+              validator: (value) => value?.isNotEmpty != true ? 'Required' : Uri.tryParse(value!) == null ? 'Invalid' : null,
             ),
-            Container(
-              margin: EdgeInsets.only(top: 12),
-              child: ElevatedButton(
-                child: Text('Save'),
-                onPressed: () => Provider.of<EditUriModel>(context, listen: false).save()
-                  .then((_) => Navigator.pop(context))
-                  .catchError((e) => print('=== $e ===')),
-              ),
+            SizedBox(height: 12),
+            ElevatedButton(
+              child: Text('Save'),
+              onPressed: () => Provider.of<EditUriModel>(context, listen: false).save()
+                .then((_) => Navigator.pop(context))
+                .catchError((e) => print('=== $e ===')),
             ),
           ],
         ),

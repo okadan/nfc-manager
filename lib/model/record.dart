@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:convert' show ascii, utf8;
 import 'dart:typed_data';
 
 import 'package:nfc_manager/nfc_manager.dart';
@@ -7,8 +7,6 @@ abstract class Record {
   NdefRecord toNdef();
 
   static Record fromNdef(NdefRecord record) {
-    if (record.typeNameFormat == NdefTypeNameFormat.empty)
-      return EmptyRecord.fromNdef(record);
     if (record.typeNameFormat == NdefTypeNameFormat.nfcWellknown && record.type.length == 1 && record.type.first == 0x54)
       return WellknownTextRecord.fromNdef(record);
     if (record.typeNameFormat == NdefTypeNameFormat.nfcWellknown && record.type.length == 1 && record.type.first == 0x55)
@@ -19,30 +17,12 @@ abstract class Record {
       return AbsoluteUriRecord.fromNdef(record);
     if (record.typeNameFormat == NdefTypeNameFormat.nfcExternal)
       return ExternalRecord.fromNdef(record);
-    return UnsupportedRecord(record: record);
-  }
-}
-
-class EmptyRecord implements Record {
-  const EmptyRecord();
-
-  static EmptyRecord fromNdef(NdefRecord record) {
-    return EmptyRecord();
-  }
-
-  @override
-  NdefRecord toNdef() {
-    return NdefRecord(
-      typeNameFormat: NdefTypeNameFormat.empty,
-      type: Uint8List(0),
-      identifier: Uint8List(0),
-      payload: Uint8List(0),
-    );
+    return UnsupportedRecord(record);
   }
 }
 
 class WellknownTextRecord implements Record {
-  const WellknownTextRecord({this.identifier, required this.languageCode, required this.text});
+  WellknownTextRecord({this.identifier, required this.languageCode, required this.text});
 
   final Uint8List? identifier;
 
@@ -77,7 +57,7 @@ class WellknownTextRecord implements Record {
 }
 
 class WellknownUriRecord implements Record {
-  const WellknownUriRecord({this.identifier, required this.uri});
+  WellknownUriRecord({this.identifier, required this.uri});
 
   final Uint8List? identifier;
 
@@ -94,7 +74,8 @@ class WellknownUriRecord implements Record {
 
   @override
   NdefRecord toNdef() {
-    var prefixIndex = NdefRecord.URI_PREFIX_LIST.indexWhere((e) => uri.toString().startsWith(e), 1);
+    var prefixIndex = NdefRecord.URI_PREFIX_LIST
+      .indexWhere((e) => uri.toString().startsWith(e), 1);
     if (prefixIndex < 0) prefixIndex = 0;
     final prefix = NdefRecord.URI_PREFIX_LIST[prefixIndex];
     return NdefRecord(
@@ -110,7 +91,7 @@ class WellknownUriRecord implements Record {
 }
 
 class MimeRecord implements Record {
-  const MimeRecord({this.identifier, required this.type, required this.data});
+  MimeRecord({this.identifier, required this.type, required this.data});
 
   final Uint8List? identifier;
 
@@ -140,7 +121,7 @@ class MimeRecord implements Record {
 }
 
 class AbsoluteUriRecord implements Record {
-  const AbsoluteUriRecord({this.identifier, required this.uriType, required this.payload});
+  AbsoluteUriRecord({this.identifier, required this.uriType, required this.payload});
 
   final Uint8List? identifier;
 
@@ -170,7 +151,7 @@ class AbsoluteUriRecord implements Record {
 }
 
 class ExternalRecord implements Record {
-  const ExternalRecord({this.identifier, required this.domain, required this.type, required this.data});
+  ExternalRecord({this.identifier, required this.domain, required this.type, required this.data});
 
   final Uint8List? identifier;
 
@@ -207,16 +188,14 @@ class ExternalRecord implements Record {
 }
 
 class UnsupportedRecord implements Record {
-  const UnsupportedRecord({required this.record});
+  UnsupportedRecord(this.record);
 
   final NdefRecord record;
 
   static UnsupportedRecord fromNdef(NdefRecord record) {
-    return UnsupportedRecord(record: record);
+    return UnsupportedRecord(record);
   }
 
   @override
-  NdefRecord toNdef() {
-    return record;
-  }
+  NdefRecord toNdef() => record;
 }

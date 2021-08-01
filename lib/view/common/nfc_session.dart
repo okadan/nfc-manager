@@ -54,7 +54,7 @@ class _UnavailableDialog extends StatelessWidget {
 }
 
 class _AndroidSessionDialog extends StatefulWidget {
-  const _AndroidSessionDialog(this.alertMessage, this.handleTag);
+  _AndroidSessionDialog(this.alertMessage, this.handleTag);
 
   final String alertMessage;
 

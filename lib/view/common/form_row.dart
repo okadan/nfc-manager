@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class FormRow extends StatelessWidget {
-  const FormRow({required this.title, this.subtitle, this.trailing, this.onTap});
+  FormRow({required this.title, this.subtitle, this.trailing, this.onTap});
 
   final Widget title;
 
@@ -18,8 +18,8 @@ class FormRow extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Container(
-          padding: EdgeInsets.fromLTRB(14, 12, 10, 12),
-          constraints: BoxConstraints(minHeight: 52),
+          padding: EdgeInsets.fromLTRB(14, 10, 8, 10),
+          constraints: BoxConstraints(minHeight: 48),
           child: Row(
             children: [
               Expanded(
@@ -31,8 +31,8 @@ class FormRow extends StatelessWidget {
                       child: title,
                     ),
                     if (subtitle != null)
-                      Container(
-                        margin: EdgeInsets.only(top: 2),
+                      Padding(
+                        padding: EdgeInsets.only(top: 2),
                         child: DefaultTextStyle(
                           style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 15),
                           child: subtitle!,
@@ -42,13 +42,11 @@ class FormRow extends StatelessWidget {
                 ),
               ),
               if (trailing != null)
-                Container(
-                  child: DefaultTextStyle(
-                    style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 16),
-                    child: IconTheme(
-                      data: IconThemeData(color: Theme.of(context).disabledColor, size: 22),
-                      child: trailing!,
-                    ),
+                DefaultTextStyle(
+                  style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 16),
+                  child: IconTheme(
+                    data: IconThemeData(color: Theme.of(context).disabledColor, size: 22),
+                    child: trailing!,
                   ),
                 ),
             ],
@@ -60,7 +58,7 @@ class FormRow extends StatelessWidget {
 }
 
 class FormSection extends StatelessWidget {
-  const FormSection({required this.children, this.header, this.footer});
+  FormSection({required this.children, this.header, this.footer});
 
   final List<Widget> children;
 
@@ -77,10 +75,10 @@ class FormSection extends StatelessWidget {
           if (header != null)
             Container(
               alignment: Alignment.bottomLeft,
-              padding: EdgeInsets.fromLTRB(14, 0, 12, 4),
+              padding: EdgeInsets.fromLTRB(16, 0, 10, 4),
               constraints: BoxConstraints(minHeight: 36),
               child: DefaultTextStyle(
-                style: Theme.of(context).textTheme.caption!,
+                style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 13),
                 child: header!,
               ),
             ),
@@ -88,7 +86,7 @@ class FormSection extends StatelessWidget {
             margin: EdgeInsets.symmetric(horizontal: 2),
             decoration: BoxDecoration(
               border: Border.all(width: 1, color: Theme.of(context).dividerColor),
-              color: Theme.of(context).cardColor,
+              color: Theme.of(context).cardTheme.color,
             ),
             child: Column(
               children: List.generate(
@@ -100,10 +98,10 @@ class FormSection extends StatelessWidget {
           if (footer != null)
             Container(
               alignment: Alignment.topLeft,
-              padding: EdgeInsets.fromLTRB(14, 4, 12, 0),
+              padding: EdgeInsets.fromLTRB(16, 4, 10, 0),
               constraints: BoxConstraints(minHeight: 36),
               child: DefaultTextStyle(
-                style: Theme.of(context).textTheme.caption!,
+                style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 13),
                 child: footer!,
               ),
             ),

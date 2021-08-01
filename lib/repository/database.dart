@@ -10,7 +10,7 @@ Future<Database> getOrCreateDatabase() {
         oldVersion < version && version <= newVersion;
       final batch = db.batch();
       if (_shouldMigrate(1)) await _migrate1(batch);
-      // more migration here:
+      // more migration here. ex:
       // if (_shouldMigrate(2)) await _migrate2(batch);
       await batch.commit();
     },

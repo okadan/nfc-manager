@@ -38,11 +38,9 @@ class EditMimeModel with ChangeNotifier {
 }
 
 class EditMimePage extends StatelessWidget {
-  EditMimePage._();
-
-  static Widget create([WriteRecord? record]) => ChangeNotifierProvider<EditMimeModel>(
+  static Widget withDependency([WriteRecord? record]) => ChangeNotifierProvider<EditMimeModel>(
     create: (context) => EditMimeModel(Provider.of(context, listen: false), record),
-    child: EditMimePage._(),
+    child: EditMimePage(),
   );
 
   @override
@@ -56,31 +54,25 @@ class EditMimePage extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.all(24),
           children: [
-            Container(
-              child: TextFormField(
-                controller: Provider.of<EditMimeModel>(context, listen: false).typeController,
-                decoration: InputDecoration(labelText: 'Type', hintText: 'text/plain', helperText: ''),
-                keyboardType: TextInputType.text,
-                validator: (value) => value?.isNotEmpty != true ? 'Required' : null,
-              ),
+            TextFormField(
+              controller: Provider.of<EditMimeModel>(context, listen: false).typeController,
+              decoration: InputDecoration(labelText: 'Type', hintText: 'text/plain', helperText: ''),
+              keyboardType: TextInputType.text,
+              validator: (value) => value?.isNotEmpty != true ? 'Required' : null,
             ),
-            Container(
-              margin: EdgeInsets.only(top: 12),
-              child: TextFormField(
-                controller: Provider.of<EditMimeModel>(context, listen: false).dataController,
-                decoration: InputDecoration(labelText: 'Data', helperText: ''),
-                keyboardType: TextInputType.text,
-                validator: (value) => value?.isNotEmpty != true ? 'Required' : null,
-              ),
+            SizedBox(height: 12),
+            TextFormField(
+              controller: Provider.of<EditMimeModel>(context, listen: false).dataController,
+              decoration: InputDecoration(labelText: 'Data', helperText: ''),
+              keyboardType: TextInputType.text,
+              validator: (value) => value?.isNotEmpty != true ? 'Required' : null,
             ),
-            Container(
-              margin: EdgeInsets.only(top: 12),
-              child: ElevatedButton(
-                child: Text('Save'),
-                onPressed: () => Provider.of<EditMimeModel>(context, listen: false).save()
-                  .then((_) => Navigator.pop(context))
-                  .catchError((e) => print('=== $e ===')),
-              ),
+            SizedBox(height: 12),
+            ElevatedButton(
+              child: Text('Save'),
+              onPressed: () => Provider.of<EditMimeModel>(context, listen: false).save()
+                .then((_) => Navigator.pop(context))
+                .catchError((e) => print('=== $e ===')),
             ),
           ],
         ),
