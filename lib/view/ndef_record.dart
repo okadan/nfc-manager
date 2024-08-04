@@ -59,7 +59,6 @@ class _RecordColumn extends StatelessWidget {
   _RecordColumn({required this.title, required this.subtitle});
 
   final Widget title;
-
   final Widget subtitle;
 
   @override
@@ -68,12 +67,12 @@ class _RecordColumn extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         DefaultTextStyle(
-          style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16),
+          style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 16),
           child: title,
         ),
         SizedBox(height: 2),
         DefaultTextStyle(
-          style: Theme.of(context).textTheme.bodyText2!.copyWith(fontSize: 15),
+          style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontSize: 15),
           child: subtitle,
         ),
       ],
@@ -82,7 +81,8 @@ class _RecordColumn extends StatelessWidget {
 }
 
 class NdefRecordInfo {
-  const NdefRecordInfo({required this.record, required this.title, required this.subtitle});
+  const NdefRecordInfo(
+      {required this.record, required this.title, required this.subtitle});
 
   final Record record;
 
@@ -133,7 +133,8 @@ class NdefRecordInfo {
       return NdefRecordInfo(
         record: _record,
         title: _typeNameFormatToString(_record.record.typeNameFormat),
-        subtitle: '(${_record.record.type.toHexString()}) ${_record.record.payload.toHexString()}',
+        subtitle:
+            '(${_record.record.type.toHexString()}) ${_record.record.payload.toHexString()}',
       );
     }
     throw UnimplementedError();

@@ -47,40 +47,50 @@ class _Home extends StatelessWidget {
             FormRow(
               title: Text('Tag - Read'),
               trailing: Icon(Icons.chevron_right),
-              onTap: () => Navigator.push(context, MaterialPageRoute(
-                builder: (context) => TagReadPage.withDependency(),
-              )),
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TagReadPage.withDependency(),
+                  )),
             ),
             FormRow(
               title: Text('Ndef - Write'),
               trailing: Icon(Icons.chevron_right),
-              onTap: () => Navigator.push(context, MaterialPageRoute(
-                builder: (context) => NdefWritePage.withDependency(),
-              )),
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => NdefWritePage.withDependency(),
+                  )),
             ),
             FormRow(
               title: Text('Ndef - Write Lock'),
               trailing: Icon(Icons.chevron_right),
-              onTap: () => Navigator.push(context, MaterialPageRoute(
-                builder: (context) => NdefWriteLockPage.withDependency(),
-              )),
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => NdefWriteLockPage.withDependency(),
+                  )),
             ),
             if (Platform.isAndroid)
               FormRow(
                 title: Text('Ndef - Format'),
                 trailing: Icon(Icons.chevron_right),
-                onTap: () => Navigator.push(context, MaterialPageRoute(
-                  builder: (context) => NdefFormatPage.withDependency(),
-                )),
+                onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => NdefFormatPage.withDependency(),
+                    )),
               ),
           ]),
           FormSection(children: [
             FormRow(
               title: Text('About'),
               trailing: Icon(Icons.chevron_right),
-              onTap: () => Navigator.push(context, MaterialPageRoute(
-                builder: (context) => AboutPage(),
-              )),
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AboutPage(),
+                  )),
             ),
           ]),
         ],
@@ -92,8 +102,8 @@ class _Home extends StatelessWidget {
 ThemeData _themeData(Brightness brightness) {
   return ThemeData(
     brightness: brightness,
-     // Matches app icon color.
-    primarySwatch:  MaterialColor(0xFF4D8CFE, <int, Color>{
+    // Matches app icon color.
+    primarySwatch: MaterialColor(0xFF4D8CFE, <int, Color>{
       50: Color(0xFFEAF1FF),
       100: Color(0xFFCADDFF),
       200: Color(0xFFA6C6FF),
@@ -106,8 +116,8 @@ ThemeData _themeData(Brightness brightness) {
       900: Color(0xFF255CFD),
     }),
     appBarTheme: AppBarTheme(
-      brightness: Brightness.dark,
-    ),
+        // brightness: Brightness.dark,
+        ),
     inputDecorationTheme: InputDecorationTheme(
       isDense: true,
       border: OutlineInputBorder(),
@@ -115,23 +125,21 @@ ThemeData _themeData(Brightness brightness) {
       errorStyle: TextStyle(height: 0.75),
       helperStyle: TextStyle(height: 0.75),
     ),
-    elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(
+    elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
       minimumSize: Size.fromHeight(40),
     )),
-    scaffoldBackgroundColor: brightness == Brightness.dark
-      ? Colors.black
-      : null,
-    cardColor: brightness == Brightness.dark
-      ? Color.fromARGB(255, 28, 28, 30)
-      : null,
+    scaffoldBackgroundColor:
+        brightness == Brightness.dark ? Colors.black : null,
+    cardColor:
+        brightness == Brightness.dark ? Color.fromARGB(255, 28, 28, 30) : null,
     dialogTheme: DialogTheme(
       backgroundColor: brightness == Brightness.dark
-        ? Color.fromARGB(255, 28, 28, 30)
-        : null,
+          ? Color.fromARGB(255, 28, 28, 30)
+          : null,
     ),
-    highlightColor: brightness == Brightness.dark
-      ? Color.fromARGB(255, 44, 44, 46)
-      : null,
+    highlightColor:
+        brightness == Brightness.dark ? Color.fromARGB(255, 44, 44, 46) : null,
     splashFactory: NoSplash.splashFactory,
   );
 }

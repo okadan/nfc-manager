@@ -27,14 +27,20 @@ class FormRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     DefaultTextStyle(
-                      style: Theme.of(context).textTheme.bodyText2!.copyWith(fontSize: 17),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium!
+                          .copyWith(fontSize: 17),
                       child: title,
                     ),
                     if (subtitle != null)
                       Padding(
                         padding: EdgeInsets.only(top: 2),
                         child: DefaultTextStyle(
-                          style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 15),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall!
+                              .copyWith(fontSize: 15),
                           child: subtitle!,
                         ),
                       ),
@@ -43,9 +49,13 @@ class FormRow extends StatelessWidget {
               ),
               if (trailing != null)
                 DefaultTextStyle(
-                  style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 16),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall!
+                      .copyWith(fontSize: 16),
                   child: IconTheme(
-                    data: IconThemeData(color: Theme.of(context).disabledColor, size: 22),
+                    data: IconThemeData(
+                        color: Theme.of(context).disabledColor, size: 22),
                     child: trailing!,
                   ),
                 ),
@@ -78,20 +88,26 @@ class FormSection extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(16, 0, 10, 4),
               constraints: BoxConstraints(minHeight: 36),
               child: DefaultTextStyle(
-                style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 13),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall!
+                    .copyWith(fontSize: 13),
                 child: header!,
               ),
             ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 2),
             decoration: BoxDecoration(
-              border: Border.all(width: 1, color: Theme.of(context).dividerColor),
+              border:
+                  Border.all(width: 1, color: Theme.of(context).dividerColor),
               color: Theme.of(context).cardColor,
             ),
             child: Column(
               children: List.generate(
                 children.isEmpty ? 0 : children.length * 2 - 1,
-                (i) => i.isOdd ? Divider(height: 1, thickness: 1) : children[i ~/ 2],
+                (i) => i.isOdd
+                    ? Divider(height: 1, thickness: 1)
+                    : children[i ~/ 2],
               ),
             ),
           ),
@@ -101,7 +117,10 @@ class FormSection extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(16, 4, 10, 0),
               constraints: BoxConstraints(minHeight: 36),
               child: DefaultTextStyle(
-                style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 13),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall!
+                    .copyWith(fontSize: 13),
                 child: footer!,
               ),
             ),

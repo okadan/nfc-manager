@@ -26,20 +26,19 @@ class NdefWriteModel with ChangeNotifier {
     return _repo.deleteWriteRecord(record);
   }
 
-  Future<String?> handleTag(NfcTag tag, Iterable<WriteRecord> recordList) async {
+  Future<String?> handleTag(
+      NfcTag tag, Iterable<WriteRecord> recordList) async {
     final tech = Ndef.from(tag);
 
-    if (tech == null)
-      throw('Tag is not ndef.');
+    if (tech == null) throw ('Tag is not ndef.');
 
-    if (!tech.isWritable)
-      throw('Tag is not ndef writable.');
+    if (!tech.isWritable) throw ('Tag is not ndef writable.');
 
     try {
       final message = NdefMessage(recordList.map((e) => e.record).toList());
       await tech.write(message);
     } on PlatformException catch (e) {
-      throw(e.message ?? 'Some error has occurred.');
+      throw (e.message ?? 'Some error has occurred.');
     }
 
     return '[Ndef - Write] is completed.';
@@ -48,9 +47,10 @@ class NdefWriteModel with ChangeNotifier {
 
 class NdefWritePage extends StatelessWidget {
   static Widget withDependency() => ChangeNotifierProvider<NdefWriteModel>(
-    create: (context) => NdefWriteModel(Provider.of(context, listen: false)),
-    child: NdefWritePage(),
-  );
+        create: (context) =>
+            NdefWriteModel(Provider.of(context, listen: false)),
+        child: NdefWritePage(),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -94,47 +94,61 @@ class NdefWritePage extends StatelessWidget {
                   );
                   switch (result) {
                     case 'text':
-                      Navigator.push(context, MaterialPageRoute(
-                        fullscreenDialog: true,
-                        builder: (context) => EditTextPage.withDependency(),
-                      ));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            fullscreenDialog: true,
+                            builder: (context) => EditTextPage.withDependency(),
+                          ));
                       break;
                     case 'uri':
-                      Navigator.push(context, MaterialPageRoute(
-                        fullscreenDialog: true,
-                        builder: (context) => EditUriPage.withDependency(),
-                      ));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            fullscreenDialog: true,
+                            builder: (context) => EditUriPage.withDependency(),
+                          ));
                       break;
                     case 'mime':
-                      Navigator.push(context, MaterialPageRoute(
-                        fullscreenDialog: true,
-                        builder: (context) => EditMimePage.withDependency(),
-                      ));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            fullscreenDialog: true,
+                            builder: (context) => EditMimePage.withDependency(),
+                          ));
                       break;
                     case 'external':
-                      Navigator.push(context, MaterialPageRoute(
-                        fullscreenDialog: true,
-                        builder: (context) => EditExternalPage.withDependency(),
-                      ));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            fullscreenDialog: true,
+                            builder: (context) =>
+                                EditExternalPage.withDependency(),
+                          ));
                       break;
                     case null:
                       break;
                     default:
-                      throw('unsupported: result=$result');
+                      throw ('unsupported: result=$result');
                   }
                 },
               ),
               FormRow(
-                title: Text('Start Session', style: TextStyle(color: ss.data?.isNotEmpty != true
-                  ? Theme.of(context).disabledColor
-                  : Theme.of(context).colorScheme.primary,
-                )),
+                title: Text('Start Session',
+                    style: TextStyle(
+                      color: ss.data?.isNotEmpty != true
+                          ? Theme.of(context).disabledColor
+                          : Theme.of(context).colorScheme.primary,
+                    )),
                 onTap: ss.data?.isNotEmpty != true
-                  ? null
-                  : () => startSession(
-                    context: context,
-                    handleTag: (tag) => Provider.of<NdefWriteModel>(context, listen: false).handleTag(tag, ss.data!),
-                  ),
+                    ? null
+                    : () => startSession(
+                          context: context,
+                          handleTag: (tag) => Provider.of<NdefWriteModel>(
+                                  context,
+                                  listen: false)
+                              .handleTag(tag, ss.data!),
+                        ),
               ),
             ]),
             if (ss.data?.isNotEmpty == true)
@@ -143,7 +157,8 @@ class NdefWritePage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('RECORDS'),
-                    Text('${ss.data!.map((e) => e.record.byteLength).reduce((a, b) => a + b)} bytes'),
+                    Text(
+                        '${ss.data!.map((e) => e.record.byteLength).reduce((a, b) => a + b)} bytes'),
                   ],
                 ),
                 children: List.generate(ss.data!.length, (i) {
@@ -188,7 +203,10 @@ class _WriteRecordFormRow extends StatelessWidget {
                   ),
                   title: Text(
                     '#$index ${info.title}',
-                    style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 14),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium!
+                        .copyWith(fontSize: 14),
                   ),
                 ),
                 ListTile(
@@ -210,16 +228,20 @@ class _WriteRecordFormRow extends StatelessWidget {
         );
         switch (result) {
           case 'view_details':
-            Navigator.push(context, MaterialPageRoute(
-              builder: (context) => NdefRecordPage(index, record.record),
-            ));
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NdefRecordPage(index, record.record),
+                ));
             break;
           case 'edit':
             assert(editPageBuilder != null);
-            Navigator.push(context, MaterialPageRoute(
-              fullscreenDialog: true,
-              builder: (context) => editPageBuilder!(record),
-            ));
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  fullscreenDialog: true,
+                  builder: (context) => editPageBuilder!(record),
+                ));
             break;
           case 'delete':
             final result = await showDialog<bool>(
@@ -241,12 +263,13 @@ class _WriteRecordFormRow extends StatelessWidget {
             );
             if (result == true)
               Provider.of<NdefWriteModel>(context, listen: false)
-                .delete(record).catchError((e) => print('=== $e ==='));
+                  .delete(record)
+                  .catchError((e) => print('=== $e ==='));
             break;
           case null:
             break;
           default:
-            throw('unsupported result: $result');
+            throw ('unsupported result: $result');
         }
       },
     );
